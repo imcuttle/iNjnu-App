@@ -32,6 +32,26 @@ module.exports = {
             )
         })
     },
+    del(id, user) {
+        return new Promise((resolve, reject) => {
+            conn.query('delete from ?? where id=? and sender=?', [table, +id, +user],
+                (err, rlt) => {
+                    if(err) {console.error(err); reject(err)}
+                    else resolve(rlt.affectedRows>0);
+                }
+            )
+        })
+    },
+    getByUser(user) {
+        return new Promise((resolve, reject) => {
+            conn.query('select * from ?? where sender=?', [table, user],
+                (err, rlt) => {
+                    if(err) {console.error(err); reject(err)}
+                    else resolve(rlt);
+                }
+            )
+        })
+    },
     list(page, size, previd) {
         page--;
         size = +size;

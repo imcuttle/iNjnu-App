@@ -14,6 +14,7 @@ import moment from 'moment'
 
 import NavigationBar from 'react-native-navbar';
 import Popup from 'react-native-popup';
+import storage from '../storage'
 
 import {Map, List} from 'immutable'
 import DiscussMain from '../components/DiscussMain'
@@ -33,10 +34,14 @@ export default class extends React.Component {
 		discuss: null,
 		commentEnable: true,
 		commentVal: '',
-		commentNumber: 0
+		commentNumber: 0,
+		selfId: ''
 	}
 	state={
 		size: 8,
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		return !Map(this.props).equals(Map(nextProps))
 	}
 	delList=[]
 	constructor(props) {
@@ -90,15 +95,16 @@ export default class extends React.Component {
 		const {navigator, setProps, route, refreshing, hasmore, loadmore, comments} = this.props
 		if(hasmore&&comments.length===0) {
 			this._addList()
+			
 		}
+	}
 
+	componentDidUpdate(prevProps, prevState) {
 		
 	}
-	componentDidUpdate(prevProps, prevState) {
-		const {setProps, focusRefresh} = this.props;
-	    // if(focusRefresh) {
-	    //   this._onRefresh();
-	    // }
+
+	componentWillReceiveProps(nextProps) {
+
 	}
 	
 
@@ -149,7 +155,17 @@ export default class extends React.Component {
 								{
 									!discuss 
 									? <LoadingView size="small" />
-									: <DiscussMain {...this.mapDiscuss(discuss)}/>
+									: <DiscussMain {...this.mapDiscuss(discuss)}
+										onImgPress={()=>{
+											navigator.push({
+												active: 'userInfo',
+												params: {
+													id: discuss.sender.id
+												},
+												title: discuss.sender.name
+											})
+										}}
+									/>
 								}
 								{
 									!!comments && comments.length>0 &&
@@ -174,6 +190,15 @@ export default class extends React.Component {
 						renderRow={(comment, sid, rid)=>
 							<Comment key={comment.id} 
 								{...this.mapComment(comment)} 
+								onImgPress={()=>{
+									navigator.push({
+										active: 'userInfo',
+										params: {
+											id: comment.user.id
+										},
+										title: comment.user.name
+									})
+								}}
 								onDelPress={comment.user.id==discuss.sender.id?()=>{
 									this.popup.confirm({
 							            title: '确定删除该评论？',
@@ -193,9 +218,9 @@ export default class extends React.Component {
 					                    		utils.fetchDelComment(comment.id)
 							                    .then(f=>{
 							                    	if(f) {
-							                    		var i = this.delList.findIndex(x=>x.id===comment.id)
+							                    		var i = this.delList.findIndex(x=>x===comment.id)
 							                    		if(i>=0) {
-								                    		this.delList = List(this.state.delList).remove(i).toArray()
+								                    		this.delList = List(this.delList).remove(i).toArray()
 								                    	}
 							                    		var newComments = List(comments).remove(rid).toArray()
 							                    		setProps({
@@ -302,12 +327,56 @@ export default class extends React.Component {
 		//title, time, name, img, commentNumber=0, content
 	}
 	mapDiscuss(discuss) {
-		const {comments, commentNumber} = this.props
+		const {comments, commentNumber, selfId, navigator, setDiscussProps} = this.props
 		if(!discuss) {
 			return {}
 		}
-
 		return {
+			onDelPress: discuss.sender.id==selfId?()=>{
+				this.popup.confirm({
+		            title: '确定删除该评论？',
+		            ok: {
+		                text: '确定',
+		                style: {
+		                    color: 'green'
+		                },
+		                callback: () => {
+		                	console.log(this.delList)
+		                	var i = this.delList.findIndex(x=>x.id===discuss.id)
+		                	if(i>=0) {
+		                		utils.toast(':) 正在处理中...')
+		                		return;
+		                	}
+		                	this.delList.push({id: discuss.id})
+	                		utils.fetchDelDiscuss(discuss.id)
+		                    .then(f=>{
+		                    	if(f) {
+		                    		var i = this.delList.findIndex(x=>x.id===discuss.id)
+		                    		if(i>=0) {
+			                    		this.delList = List(this.delList).remove(i).toArray()
+			                    	}
+		                    		navigator.pop()
+		                    		setDiscussProps({
+					              		refreshing: true,
+					              		hasmore: true,
+					              		focusRefresh: true
+					              	})
+		                    	}
+		                    })
+		                    
+		                },
+		            },
+		            cancel: {
+		                text: '取消',
+		                style: {
+		                    color: 'red'
+		                },
+		                callback: () => {
+		                    
+		                },
+		            },
+		        });
+			}:null,
 			time: moment(discuss.datetime).format('YYYY-MM-DD HH:mm'),
 			id: discuss.id,
 			img: discuss.sender.img,

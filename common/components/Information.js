@@ -4,7 +4,8 @@ import {
   Text,
   View,
   Image,
-  TouchableHighlight
+  TouchableHighlight,
+  TouchableWithoutFeedback
 } from 'react-native';
 
 import Tabs from 'react-native-tabs';
@@ -17,23 +18,35 @@ export default class BottomBar extends Component {
     
   }
   static defaultProps = {
-    id: '19130126',
-    name: '余聪',
-    img: "https://facebook.github.io/react/img/logo_og.png",
-    gender: '男',
-    sign: '222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222'
+    id: '',
+    name: '',
+    img: "",
+    grade: "",
+    department: "",
+    classNo: "",
+    commentNumber: 0,
+    discussNumber: 0,
+    sign: ''
   }
   render() {
-    const {img, name, gender, id, sign} = this.props;
+    const {img, name, classNo, department, commentNumber, discussNumber, id, sign, onImgPress, onImgBlockPress, onSignPress} = this.props;
     const rightArrow = <Image style={styles.rightArrow} source={require("../res/imgs/Forward.png")}/>
     const itemStyle = [styles.item, {height: 58}]
     return (
       <View style={{flex: 1, marginTop: 10}}>
         
         <View style={[itemStyle, {backgroundColor: 'rgba(255,255,255,0.8)', borderColor: '#ccc'}]}>
-          <Text style={styles.label}>头像</Text>
-          <Image source={{uri: img}} style={[styles.img, {marginRight: 10}]}/>
-          {rightArrow}
+          <TouchableHighlight
+            style={{minHeight: 120}}
+            underlayColor="rgba(238,242,247,0.8)"
+            onPress={onImgBlockPress}
+          >
+            <Text style={styles.label}>头像</Text>
+            <TouchableWithoutFeedback onPress={onImgPress}>
+              <Image source={{uri: img}} style={[styles.img, {marginRight: 10}]}/>
+            </TouchableWithoutFeedback>
+            {rightArrow}
+          </TouchableHighlight>
         </View>
 
         <View style={itemStyle}>
@@ -46,14 +59,24 @@ export default class BottomBar extends Component {
           <Text style={styles.text}>{id}</Text>
         </View>
 
+        <View style={itemStyle}>
+          <Text style={styles.label}>班级</Text>
+          <Text style={styles.text}>{classNo}</Text>
+        </View>
+
+        <View style={itemStyle}>
+          <Text style={styles.label}>年级</Text>
+          <Text style={styles.text}>{grade}</Text>
+        </View>
+
         <View style={[itemStyle, {borderBottomWidth: 0}]}>
-          <Text style={styles.label}>性别</Text>
-          <Text style={styles.text}>{gender}</Text>
-          
+          <Text style={styles.label}>学院</Text>
+          <Text style={styles.text}>{department}</Text>
         </View>
 
         <TouchableHighlight
           style={{minHeight: 120}}
+          onPress={onSignPress}
           underlayColor="rgba(238,242,247,0.8)"
         >
           <View style={[styles.item, {
@@ -61,7 +84,7 @@ export default class BottomBar extends Component {
             flexDirection: 'column', marginTop: 20,
             flex: 1, justifyContent: null, alignItems: null,
           }]}>
-            <Text style={[styles.label, {height: 30, flex: -1}]}>个人公告</Text>
+            <Text selectable={true} style={[styles.label, {height: 30, flex: -1}]}>个人公告</Text>
             <View style={{flexDirection: 'row', flex: 1}}>
               <Text style={[styles.text, {textAlign: 'left', marginLeft: 10, marginRight: 15,flex: 1}]}>{sign || '无介绍'}</Text>
               {rightArrow}

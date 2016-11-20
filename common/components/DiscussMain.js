@@ -3,10 +3,15 @@ import {
 	Text,
 	Image,
 	View,
+	TouchableWithoutFeedback,
+	TouchableOpacity,
 	StyleSheet,
 } from 'react-native'
 
 import {Map} from 'immutable'
+
+import Markdown from 'react-native-simple-markdown'
+
 
 export default class extends React.Component {
 	constructor(props) {
@@ -17,27 +22,55 @@ export default class extends React.Component {
 		return !Map(newProps).equals(Map(this.props));
 	}
 	render() {
-		const {title, time, name, img, commentNumber=0, content} = this.props
+		const {title, time, name, img, commentNumber=0, content, onImgPress, onDelPress} = this.props
 		return (
 			<View style={styles.container}>
 				<View style={{marginHorizontal: 5}}>
 				<View style={{flexDirection: 'column'}}>
 					<View style={{flexDirection: 'row'}}>
-						<Image source={{uri: img}} style={styles.img}/>
+						<TouchableWithoutFeedback onPress={onImgPress}>
+							<Image source={{uri: img}} style={styles.img}/>
+						</TouchableWithoutFeedback>
 						<View style={{flexDirection: 'column', flex: 1}}>
 							<Text selectable={true} style={styles.name}>{name}</Text>
 							<Text selectable={true} style={styles.time}>{time}</Text>
 						</View>
-						<Text style={styles.commentNumber}>评论数：{commentNumber}</Text>
+						<View style={{flexDirection: 'column'}}>
+						{	onDelPress &&
+							<TouchableOpacity
+								onPress={onDelPress}
+								activeOpacity={0.7}
+							>
+								<Text style={{textAlign: 'right', fontSize: 12, color: 'red'}}>删除</Text>
+							</TouchableOpacity>
+						}
+							<Text style={[styles.commentNumber, {marginRight: 0}]}>{commentNumber}条评论</Text>
+						</View>
 					</View>
 				</View>
 				<View style={styles.contentContainer}>
-					<Text selectable={true}>{content}</Text>
+					<Markdown style={mdstyle}>
+						{content}
+					</Markdown>
 				</View>
 				</View>
 			</View>
 		)
 	}
+}
+const mdstyle = {
+  heading1: {
+    fontSize: 22,
+  },
+  strong: {
+    fontSize: 18,
+  },
+  paragraph: {
+    fontSize: 14,
+  },
+  view: {
+    borderWidth: 1,
+  },
 }
 
 const styles = StyleSheet.create({

@@ -42,7 +42,16 @@ module.exports = {
             )
         })
     },
-
+    getByUser(user) {
+        return new Promise((resolve, reject) => {
+            conn.query('select * from ?? where user=?', [table, user],
+                (err, rlt) => {
+                    if(err) {console.error(err); reject(err)}
+                    else resolve(rlt);
+                }
+            )
+        })
+    },
     list(forid, page, size, previd) {
         page--;
         size = +size;

@@ -8,22 +8,24 @@ import {
   Navigator
 } from 'react-native';
 import {Map} from 'immutable'
+import ImagePreview from 'react-native-image-preview'
 
-import LoginForm from './LoginForm'
+import LoginForm from './components/LoginForm'
 
-import utils from '../utils'
+import utils from './utils'
 
-import FriendsPage from '../pages/FriendsPage'
-import LookupPage from '../pages/LookupPage'
-import InitPage from '../pages/InitPage'
-import DiscussPage from '../pages/DiscussPage'
-import DiscussMainPage from '../pages/DiscussMainPage'
-import PersonPage from '../pages/PersonPage'
-import ChatPage from '../pages/ChatPage'
-import DeployPage from '../pages/DeployPage'
-import LookupScorePage from '../pages/LookupScorePage'
+import FriendsPage from './pages/FriendsPage'
+import LookupPage from './pages/LookupPage'
+import InitPage from './pages/InitPage'
+import DiscussPage from './pages/DiscussPage'
+import DiscussMainPage from './pages/DiscussMainPage'
+import PersonPage from './pages/PersonPage'
+import ChatPage from './pages/ChatPage'
+import DeployPage from './pages/DeployPage'
+import LookupScorePage from './pages/LookupScorePage'
+import UserInfoPage from './pages/UserInfoPage'
 
-require('../workers');
+require('./workers');
   
 
 export default class App extends Component {
@@ -33,7 +35,8 @@ export default class App extends Component {
     discussProps: {},
     deployProps: {},
     friendProps: {},
-    discussMainProps: {}
+    discussMainProps: {},
+    preview: ''
   }
   constructor(props) {
     super(props)
@@ -54,11 +57,11 @@ export default class App extends Component {
     
   }
   render() {
-  	const {loading, login, discussProps, friendProps, deployProps, discussMainProps} = this.state;
+  	const {loading, login, discussProps, friendProps, deployProps, preview, discussMainProps} = this.state;
 
     return (
         <Navigator
-          initialRoute={{active: 'lookup', title: "Best NJNU", params: {}}}
+          initialRoute={{active: 'person', title: "iNjnu", params: {id: '19130126'}}}
           renderScene={(route, navigator) => {
               let active = route.active, title = route.title, params = route.params;
               let Page;
@@ -82,7 +85,12 @@ export default class App extends Component {
                       setProps={this.setDiscussProps}
                      />
                   } else if(active === 'person') {
-                    Page = <PersonPage route={route} navigator={navigator} setParentState={this.setState.bind(this)} />
+                    Page = <PersonPage 
+                      route={route} 
+                      navigator={navigator} 
+                      setParentState={this.setState.bind(this)} 
+                      setPreview={(preview)=>this.setState({preview})}
+                    />
                   } else if(active === 'chat') {
                     Page = <ChatPage route={route} navigator={navigator} />
                   } else if(active === 'deploy') {
@@ -97,6 +105,7 @@ export default class App extends Component {
                     />
                   } else if(active === 'discussMain') {
                     Page = <DiscussMainPage navigator={navigator} route={route}
+                      setDiscussProps={this.setDiscussProps}
                       setProps={(props)=>{
                         var ent = discussMainProps[route.params.id] || {}
 
@@ -110,12 +119,18 @@ export default class App extends Component {
                     Page = <LookupScorePage 
                       navigator={navigator} 
                     />
+                  } else if(active === 'userInfo') {
+                    Page = <UserInfoPage 
+                      setPreview={(preview)=>this.setState({preview})}
+                      navigator={navigator} route={route}
+                    />
                   }
                 }
               }
               return (
                 <View style={{flex: 1}}>
                   {Page}
+                  {!!preview && <ImagePreview visable={!!preview} source={{uri: preview}} close={()=>this.setState({preview: ''})}/>}
                 </View>
               )
             }

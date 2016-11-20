@@ -1,6 +1,6 @@
 var express = require('express');
 var jwt = require('jsonwebtoken');
-
+var p = require('path')
 
 var api = express();
 var SECRET = require('./protect').SECRET
@@ -11,11 +11,17 @@ var userdb = require('./database/users')
 var dissdb = require('./database/discusses')
 var commentdb = require('./database/comments')
 
+
+function obj(code, result) {
+	return {code, result}
+}
 function getUserAllInfo(id) {
 	return userdb.get(id).then(u=>{
 		return njnu.getStudentInfo(u.id, u.password)
 		.then(info=>{
 			delete u.password;
+			var i = info.img.lastIndexOf('/')
+			info.grade = p.basename(info.img.slice(0, i)).replace(/[\D]/g, '')
 			u.img && delete info.img
 			return Object.assign(u, info)
 		})
@@ -32,9 +38,9 @@ api.post('/user/login', (req, res, next)=>{
 		if(flag) {
 			userdb.check(stu.id).then( f => !f&&userdb.add(stu.id, stu.password) )
 			var token = jwt.sign(stu, SECRET, {noTimestamp: true});
-			res.json({code: 200, result: token});
+			res.json(obj(200, token));
 		} else {
-			res.json({code: 404, result: '用户不存在'});
+			res.json(obj(404, '用户不存在'));
 		}
 	}).catch(err=>res.json({code: 502, result: err.message}))
 })
@@ -127,7 +133,21 @@ api.get('/discuss/list', (req, res)=> {
 	}
 })
 
-
+api.post('/discuss/del', (req, res) => {
+	var tokenJson = req.tokenJson;
+	var sender = tokenJson.id, password = tokenJson.password;
+	var ent = req.body;
+	var id = ent.id;
+	if(!id) {
+		res.json({code: 400, result: '存在空参数'})
+	} else {
+		dissdb.del(id, sender)
+			.then(f=>{
+				f && res.json({code: 200, result: '删除成功'})
+				!f && res.json({code: 404, result: '删除失败'})
+			}).catch(err=>res.json({code: 502, result: err.message}))
+	}
+})
 
 api.get('/discuss/get', (req, res) => {
 	var tokenJson = req.tokenJson;
@@ -224,6 +244,24 @@ api.get('/lookup/score', (req, res) => {
 			res.json({code: 200, result: {data}})
 	})
 	.catch(err=>res.json({code: 502, result: err.message}))
+})
+
+api.get('/info/get', (req, res) => {
+	var tokenJson = req.tokenJson;
+	var sender = tokenJson.id, password = tokenJson.password;
+	var ent = req.query;
+	var id = ent.id;
+	if(id==null) {
+		res.json(obj(400, '存在空参数'))
+	} else {
+		getUserAllInfo(id).then(info=>
+			Promise.all([
+				commentdb.getByUser(id),
+				dissdb.getByUser(id)
+			]).then((vals)=>res.json(obj(200, Object.assign(info, {commentNumber: vals[0].length, discussNumber: vals[1].length}))))
+		)
+		.catch(err=>res.json(obj(502, err.message)))
+	}
 })
 
 module.exports = api;

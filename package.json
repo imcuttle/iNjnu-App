@@ -17,11 +17,13 @@
     "react": "~15.3.1",
     "react-native": "0.37.0",
     "react-native-gifted-chat": "0.0.10",
+    "react-native-image-preview": "^0.1.1",
     "react-native-loading-spinner-overlay": "^0.3.0",
     "react-native-modal-picker": "0.0.16",
     "react-native-navbar": "^1.5.4",
     "react-native-popup": "^0.6.1",
     "react-native-root-toast": "^1.0.3",
+    "react-native-simple-markdown": "^1.0.60-rc.2",
     "react-native-tabs": "^1.0.9",
     "tcomb-form-native": "^0.6.1"
   },

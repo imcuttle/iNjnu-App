@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import BottomBar from '../components/BottomBar'
 import Information from '../components/Information'
+import Loading from '../components/LoadingView'
 import NavigationBar from 'react-native-navbar';
 
 export default class extends Component {
@@ -27,22 +28,40 @@ export default class extends Component {
   }
 
   state={
-    
+    info: {},
+    refreshing: true
   }
-
+  componentDidMount() {
+    const {navigator} = this.props;
+    utils.fetchInfo()
+    .then(data=>{
+      this.setState({
+        refreshing: false,
+        info: data,
+      })
+    })
+  }
   render() {
-    const {navigator, setParentState} = this.props;
+    const {navigator, setPreview} = this.props
+    const {info, refreshing} = this.state;
     return (
       <View style={{flex: 1}}>
         <NavigationBar
           title={{title: '个人', tintColor: 'red', style: {fontSize: 20}}}
           style={{height: 45, flex: null}}
         />
-        
           <View style={styles.mainContent}>
-            <Information navigator={navigator} />
+            {
+              refreshing ? <Loading /> 
+              : <Information navigator={navigator} 
+                  {...info}
+                  onImgPress={()=>setPreview(info.img)}
+                  onImgBlockPress={()=>{}}
+                  onSignPress={()=>{}}
+                />
+            }
           </View>
-          <BottomBar style={{flex: 1}} navigator={navigator} active={'person'} setParentState={setParentState}/>
+          <BottomBar style={{flex: 1}} navigator={navigator} active={'person'} />
       </View>
     )
   }

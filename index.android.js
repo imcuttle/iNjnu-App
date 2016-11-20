@@ -14,10 +14,7 @@ import {
 } from 'react-native';
 
 
-
-
-import utils from './common/utils'
-import App from './common/components/App'
+import App from './common/App'
 
 export default class iNjnu extends Component {
 

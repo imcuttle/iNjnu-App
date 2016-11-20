@@ -5,10 +5,12 @@ import {
 	View,
 	StyleSheet,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
 	TouchableHighlight
 } from 'react-native'
 
 import {Map} from 'immutable'
+import Markdown from 'react-native-simple-markdown'
 
 export default class extends React.Component {
 	constructor(props) {
@@ -18,12 +20,14 @@ export default class extends React.Component {
 		return !Map(newProps).equals(Map(this.props));
 	}
 	render() {
-		const {title, time, name, img, lev, content, onDelPress} = this.props
+		const {title, time, name, img, lev, content, onDelPress, onImgPress} = this.props
 		return (
 			<View style={styles.container}>
 				<View style={{flexDirection: 'column'}}>
 					<View style={{flexDirection: 'row'}}>
-						<Image source={{uri: img}} style={styles.img}/>
+						<TouchableWithoutFeedback onPress={onImgPress}>
+							<Image source={{uri: img}} style={styles.img}/>
+						</TouchableWithoutFeedback>
 						<View style={{flexDirection: 'column', flex: 1}}>
 							<View style={{flexDirection: 'row', flex: 1}}>
 								<Text selectable={true} style={[styles.name, {flex: 1}]}>{name}</Text>
@@ -39,7 +43,7 @@ export default class extends React.Component {
 							</View>
 							<Text selectable={true} style={styles.time}>{time}</Text>
 							<View style={styles.contentContainer}>
-								<Text selectable={true}>{content}</Text>
+								<Markdown style={mdstyle}>{content}</Markdown>
 							</View>
 						</View>
 					</View>
@@ -47,6 +51,20 @@ export default class extends React.Component {
 			</View>
 		)
 	}
+}
+const mdstyle = {
+  heading1: {
+    fontSize: 22,
+  },
+  strong: {
+    fontSize: 18,
+  },
+  paragraph: {
+    fontSize: 14,
+  },
+  view: {
+    borderWidth: 1,
+  },
 }
 
 const styles = StyleSheet.create({

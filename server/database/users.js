@@ -37,7 +37,11 @@ module.exports = {
             conn.query('select * from ?? where id=?', [table, id],
                 (err, rlt) => {
                     if(err) {console.error(err); reject(err)}
-                    else resolve(rlt.length===0 ? null: rlt.length===1 ? rlt[0]: rlt);
+                    else {
+                        if(rlt.length===0)
+                            reject(new Error("用户不存在"));
+                        resolve(rlt.length===1 ? rlt[0]: rlt);
+                    }
                 }
             )
         })

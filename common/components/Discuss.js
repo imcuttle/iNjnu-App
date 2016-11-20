@@ -4,7 +4,8 @@ import {
   Text,
   View,
   Image,
-  TouchableHighlight
+  TouchableHighlight,
+  TouchableWithoutFeedback
 } from 'react-native';
 
 import Tabs from 'react-native-tabs';
@@ -16,7 +17,7 @@ export default class BottomBar extends Component {
     
   }
 	render() {
-		const {title, img, name, tip, summary, onPress} = this.props;
+		const {title, img, name, tip, summary, onPress, onImgPress} = this.props;
 		return (
 			<TouchableHighlight
         style={styles.item}
@@ -25,7 +26,12 @@ export default class BottomBar extends Component {
       >
         <View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <TouchableHighlight
+            onPress={onImgPress}
+            underlayColor="rgba(238,242,247,0.6)"
+          >
             <Image source={{uri: img}} style={styles.img}/>
+          </TouchableHighlight>
             <Text style={styles.name}>{name}</Text>
             <Text style={styles.tip}>{tip}</Text>
           </View>

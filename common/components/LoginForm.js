@@ -51,7 +51,8 @@ export default class AwesomeProject extends Component {
 			utils.fetchLoginAction(val.id, val.password)
 			.then(token => {
         if(token) {
-          db.set('token', token).then(()=>{
+          Promise.all(db.set('token', token), db.set('user', val.id.trim()))
+          .then(()=>{
 
           }, (err)=>{
             alert(err.message);

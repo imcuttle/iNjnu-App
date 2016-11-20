@@ -34,19 +34,19 @@ export default class extends React.Component {
 	}
 	componentDidMount() {
 		this.setState({refreshing: true})
-		this.time = setTimeout(()=>{
-			utils.fetchLookupScore(true)
-			.then(data=>{
-				var main=data.data
-				Object.keys(main.map).forEach(x=>{
-					main.map[x] = main.map[x].map(r=>{
-						r.subject=r.subject.replace(/^\[\w+\]/, '')
-						return r
-					})
+		
+		utils.fetchLookupScore(true)
+		.then(data=>{
+			var main=data.data
+			Object.keys(main.map).forEach(x=>{
+				main.map[x] = main.map[x].map(r=>{
+					r.subject=r.subject.replace(/^\[\w+\]/, '')
+					return r
 				})
-				this.setState({refreshing: false, ...data})
 			})
-		}, 750)
+			this.setState({refreshing: false, ...data})
+		})
+		
 	}
 	mapData(data) {
 		return {
@@ -104,7 +104,7 @@ export default class extends React.Component {
 		        		</View>
 				        <ListView 
 				        	enableEmptySections={true}
-				        	initialListSize={10}
+				        	initialListSize={20}
 				        	keyboardDismissMode="on-drag"
 				        	showsVerticalScrollIndicator={true}
 				        	renderHeader={()=><View style={{marginTop: 20, flex: 1}}><BaseInfo {...info}/></View>}

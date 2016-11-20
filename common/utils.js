@@ -1,6 +1,12 @@
 
 import db from './storage'
-import Toast from 'react-native-root-toast';
+
+import {Platform} from 'react-native'
+var Toast = Platform.select({
+  ios: () => require('react-native-root-toast'),
+  android: () => require('react-native').ToastAndroid,
+})();
+
 
 var host = "http://192.168.2.100:9669";
 var DEV = true
@@ -131,8 +137,10 @@ var utils = {
 			.then(res => res.json())
 			.then(json=>{
 				if(json.code===200) {
-					//this.toast(json.result);
-					return json.result;
+					return db.get('user').then(selfId=>{return {
+						selfId,
+						...json.result
+					}});
 				} else {
 					this.toast(json.result);
 					return;
@@ -220,10 +228,63 @@ var utils = {
 			})
 		)
 	},
+	fetchDelDiscuss(id) {
+		return db.get('token').then((token) => 
+			fetch(this.urls.deldiscuss, {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+    				'Content-Type': 'application/json',
+    				'authorization': token
+				},
+				body: JSON.stringify({id})
+			})
+			.then(res => res.json())
+			.then(json=>{
+				if(json.code===200) {
+					this.toast(json.result);
+					return true;
+				} else {
+					this.toast(json.result);
+					return false;
+				}
+			}).catch(err=>{
+				DEV && this.toast(err.message)
+				return false;
+			})
+		)
+	},
+	fetchInfo(id) {
+		return db.get('token').then((token) => 
+			fetch(this.urls.infoget+'?'+this.urlStringify({id}), {
+				method: 'GET',
+				headers: {
+					'Accept': 'application/json',
+    				'Content-Type': 'application/json',
+    				'authorization': token
+				},
+			})
+			.then(res => res.json())
+			.then(json=>{
+				if(json.code===200) {
+					// this.toast(json.result);
+					return json.result;
+				} else {
+					this.toast(json.result);
+					return;
+				}
+			}).catch(err=>{
+				DEV && this.toast(err.message)
+				return;
+			})
+		)
+	},
 	urlStringify(json) {
 		return Object.getOwnPropertyNames(json).map(k=>k+'='+(!!json[k]?json[k]:'')).join('&')
 	},
 	urls: {
+		deldiscuss: host+'/api/discuss/del',
+		infoget: host+'/api/info/get',
 		delcomment: host+'/api/comment/del',
 		lookupscore: host+'/api/lookup/score',
 		commentput: host+'/api/comment/put',
@@ -234,29 +295,32 @@ var utils = {
 		login: host+'/api/user/login'
 	},
 	toast(msg) {
-
-		let toast = Toast.show(msg, {
-		    duration: Toast.durations.SHORT,
-		    position: Toast.positions.TOP,
-		    shadow: true,
-		    animation: true,
-		    hideOnPress: false,
-		    delay: 0,
-		    onShow: () => {
-		        // calls on toast\`s appear animation start
-		    },
-		    onShown: () => {
-		        // calls on toast\`s appear animation end.
-		    },
-		    onHide: () => {
-		        // calls on toast\`s hide animation start.
-		    },
-		    onHidden: () => {
-		        // calls on toast\`s hide animation end.
-		    }
-		});
-
-
+		var opt;
+		if(Platform.os==='ios') {
+			opt = {
+			    duration: Toast.durations.SHORT,
+			    position: Toast.positions.BOTTOM,
+			    shadow: true,
+			    animation: true,
+			    hideOnPress: false,
+			    delay: 0,
+			    onShow: () => {
+			        // calls on toast\`s appear animation start
+			    },
+			    onShown: () => {
+			        // calls on toast\`s appear animation end.
+			    },
+			    onHide: () => {
+			        // calls on toast\`s hide animation start.
+			    },
+			    onHidden: () => {
+			        // calls on toast\`s hide animation end.
+			    }
+			}
+		} else {
+			opt = Toast.SHORT
+		}
+		Toast.show(msg, opt);
 	}
 }
 

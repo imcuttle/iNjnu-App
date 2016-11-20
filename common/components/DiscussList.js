@@ -163,6 +163,7 @@ export default class extends Component {
     var newData = discusses.map(discuss=>{return {
       img: discuss.sender.img,
       id: discuss.id,
+      sender: discuss.sender.id,
       summary: discuss.summary,
       name: discuss.sender.name,
       title: discuss.title,
@@ -198,15 +199,26 @@ export default class extends Component {
   	var style = {paddingHorizontal: 12, paddingVertical: 6}
   	
   	return (
-  		<Discuss {...rowData} onPress={()=>{
-        navigator.push({
-          active: 'discussMain',
-          title: rowData.title,
-          params: {
-            id: rowData.id
-          }
-        })
-      }}/>
+  		<Discuss {...rowData} 
+        onPress={()=>{
+          navigator.push({
+            active: 'discussMain',
+            title: rowData.title,
+            params: {
+              id: rowData.id
+            }
+          })
+        }}
+        onImgPress={()=>{
+          navigator.push({
+            active: 'userInfo',
+            title: rowData.name,
+            params: {
+              id: rowData.sender
+            }
+          })
+        }}
+      />
   	)
   }
 }
