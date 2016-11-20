@@ -1,0 +1,39 @@
+{
+  "name": "iNjnu",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest",
+    "flow": "flow; test $? -eq 0 -o $? -eq 2"
+  },
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "express": "^4.14.0",
+    "immutable": "^3.8.1",
+    "jsonwebtoken": "^7.1.9",
+    "moment": "^2.16.0",
+    "mysql": "^2.12.0",
+    "react": "~15.3.1",
+    "react-native": "0.37.0",
+    "react-native-gifted-chat": "0.0.10",
+    "react-native-loading-spinner-overlay": "^0.3.0",
+    "react-native-modal-picker": "0.0.16",
+    "react-native-navbar": "^1.5.4",
+    "react-native-popup": "^0.6.1",
+    "react-native-root-toast": "^1.0.3",
+    "react-native-tabs": "^1.0.9",
+    "tcomb-form-native": "^0.6.1"
+  },
+  "devDependencies": {
+    "babel-jest": "17.0.2",
+    "babel-preset-react-native": "1.9.0",
+    "flow-bin": "^0.35.0",
+    "jest": "17.0.2",
+    "jest-react-native": "17.0.2",
+    "react-test-renderer": "~15.3.1"
+  },
+  "jest": {
+    "preset": "jest-react-native"
+  }
+}
