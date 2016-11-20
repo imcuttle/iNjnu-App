@@ -10,12 +10,16 @@ import {
   ListView,
   RecyclerViewBackedScrollView,
   TouchableOpacity,
-  Image
+  Image,
+  Platform
 } from 'react-native';
 import BottomBar from '../components/BottomBar'
 import Information from '../components/Information'
 import Loading from '../components/LoadingView'
-import NavigationBar from 'react-native-navbar';
+import NavigationBar from 'react-native-navbar'
+
+
+import utils from '../utils'
 
 export default class extends Component {
 
@@ -56,7 +60,10 @@ export default class extends Component {
               : <Information navigator={navigator} 
                   {...info}
                   onImgPress={()=>setPreview(info.img)}
-                  onImgBlockPress={()=>{}}
+                  onImgBlockPress={()=>{
+                    utils.imagePick('请选择照片')
+                    .then(source=>source && this.setState({info: {...info, img: source.uri}}))
+                  }}
                   onSignPress={()=>{}}
                 />
             }

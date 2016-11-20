@@ -13,7 +13,6 @@ import {
 import moment from 'moment'
 
 import NavigationBar from 'react-native-navbar';
-import Popup from 'react-native-popup';
 import storage from '../storage'
 
 import {Map, List} from 'immutable'
@@ -128,7 +127,7 @@ export default class extends React.Component {
 	render() {
 		const {
 			navigator, setProps, route, refreshing, hasmore, commentNumber, 
-			commentEnable, loadmore, comments, discuss, commentVal, id
+			commentEnable, loadmore, comments, discuss, commentVal, id, confirm
 		} = this.props
 		const {size} = this.state
 		bgcolor = commentEnable?'rgb(14, 167, 221)':'rgb(125, 125, 125)'
@@ -200,49 +199,30 @@ export default class extends React.Component {
 									})
 								}}
 								onDelPress={comment.user.id==discuss.sender.id?()=>{
-									this.popup.confirm({
-							            title: '确定删除该评论？',
-							            ok: {
-							                text: '确定',
-							                style: {
-							                    color: 'green'
-							                },
-							                callback: () => {
-							                	var i = this.delList.findIndex(x=>x===comment.id)
-							                	if(i>=0) {
-							                		utils.toast(':) 正在处理中...')
-							                		return;
-							                	}
-							                	this.delList.push(comment.id)
-						                    	
-					                    		utils.fetchDelComment(comment.id)
-							                    .then(f=>{
-							                    	if(f) {
-							                    		var i = this.delList.findIndex(x=>x===comment.id)
-							                    		if(i>=0) {
-								                    		this.delList = List(this.delList).remove(i).toArray()
-								                    	}
-							                    		var newComments = List(comments).remove(rid).toArray()
-							                    		setProps({
-							                    			comments: newComments,
-							                    			commentNumber: commentNumber-1
-							                    		})
-							                    	}
-							                    })
-							                    
-							                },
-							            },
-							            cancel: {
-							                text: '取消',
-							                style: {
-							                    color: 'red'
-							                },
-							                callback: () => {
-							                    
-							                },
-							            },
-							        });
-								}:null}
+									var i = this.delList.findIndex(x=>x===comment.id)
+				                	if(i>=0) {
+				                		utils.toast(':) 正在处理中...')
+				                		return;
+				                	}
+									confirm('确定删除该评论？', () => {
+					                	this.delList.push(comment.id)
+					            		utils.fetchDelComment(comment.id)
+					                    .then(f=>{
+					                    	if(f) {
+					                    		var i = this.delList.findIndex(x=>x===comment.id)
+					                    		if(i>=0) {
+						                    		this.delList = List(this.delList).remove(i).toArray()
+						                    	}
+					                    		var newComments = List(comments).remove(rid).toArray()
+					                    		setProps({
+					                    			comments: newComments,
+					                    			commentNumber: commentNumber-1
+					                    		})
+					                    	}
+					                    })
+					                    
+					                })
+								} : null}
 							/>
 						}
 						showsVerticalScrollIndicator={true}
@@ -307,10 +287,11 @@ export default class extends React.Component {
 							</TouchableHighlight>
 						</View>
 				}
-				<Popup ref={popup => this.popup = popup } isOverlayClickClose={false}/>
+				
 			</View>
 		)
 	}
+
 	mapComment(comment) {
 		if(!comment) {
 			return {}
@@ -327,55 +308,38 @@ export default class extends React.Component {
 		//title, time, name, img, commentNumber=0, content
 	}
 	mapDiscuss(discuss) {
-		const {comments, commentNumber, selfId, navigator, setDiscussProps} = this.props
+		const {comments, commentNumber, selfId, navigator, setDiscussProps, confirm} = this.props
 		if(!discuss) {
 			return {}
 		}
 		return {
 			onDelPress: discuss.sender.id==selfId?()=>{
-				this.popup.confirm({
-		            title: '确定删除该评论？',
-		            ok: {
-		                text: '确定',
-		                style: {
-		                    color: 'green'
-		                },
-		                callback: () => {
-		                	console.log(this.delList)
-		                	var i = this.delList.findIndex(x=>x.id===discuss.id)
-		                	if(i>=0) {
-		                		utils.toast(':) 正在处理中...')
-		                		return;
-		                	}
-		                	this.delList.push({id: discuss.id})
-	                		utils.fetchDelDiscuss(discuss.id)
-		                    .then(f=>{
-		                    	if(f) {
-		                    		var i = this.delList.findIndex(x=>x.id===discuss.id)
-		                    		if(i>=0) {
-			                    		this.delList = List(this.delList).remove(i).toArray()
-			                    	}
-		                    		navigator.pop()
-		                    		setDiscussProps({
-					              		refreshing: true,
-					              		hasmore: true,
-					              		focusRefresh: true
-					              	})
+				var i = this.delList.findIndex(x=>x.id===discuss.id)
+            	if(i>=0) {
+            		utils.toast(':) 正在处理中...')
+            		return;
+            	}
+				confirm('确定删除该评论？',
+	                () => {
+	                	this.delList.push({id: discuss.id})
+                		utils.fetchDelDiscuss(discuss.id)
+	                    .then(f=>{
+	                    	if(f) {
+	                    		var i = this.delList.findIndex(x=>x.id===discuss.id)
+	                    		if(i>=0) {
+		                    		this.delList = List(this.delList).remove(i).toArray()
 		                    	}
-		                    })
-		                    
-		                },
-		            },
-		            cancel: {
-		                text: '取消',
-		                style: {
-		                    color: 'red'
-		                },
-		                callback: () => {
-		                    
-		                },
-		            },
-		        });
+	                    		navigator.pop()
+	                    		setDiscussProps({
+				              		refreshing: true,
+				              		hasmore: true,
+				              		focusRefresh: true
+				              	})
+	                    	}
+	                    })
+	                    
+	                },
+		        );
 			}:null,
 			time: moment(discuss.datetime).format('YYYY-MM-DD HH:mm'),
 			id: discuss.id,

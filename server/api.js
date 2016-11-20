@@ -250,18 +250,15 @@ api.get('/info/get', (req, res) => {
 	var tokenJson = req.tokenJson;
 	var sender = tokenJson.id, password = tokenJson.password;
 	var ent = req.query;
-	var id = ent.id;
-	if(id==null) {
-		res.json(obj(400, '存在空参数'))
-	} else {
-		getUserAllInfo(id).then(info=>
-			Promise.all([
-				commentdb.getByUser(id),
-				dissdb.getByUser(id)
-			]).then((vals)=>res.json(obj(200, Object.assign(info, {commentNumber: vals[0].length, discussNumber: vals[1].length}))))
-		)
-		.catch(err=>res.json(obj(502, err.message)))
-	}
+	var id = ent.id || sender;
+
+	getUserAllInfo(id).then(info=>
+		Promise.all([
+			commentdb.getByUser(id),
+			dissdb.getByUser(id)
+		]).then((vals)=>res.json(obj(200, Object.assign(info, {commentNumber: vals[0].length, discussNumber: vals[1].length}))))
+	)
+	.catch(err=>res.json(obj(502, err.message)))
 })
 
 module.exports = api;

@@ -5,7 +5,8 @@ import {
   View,
   Image,
   TouchableHighlight,
-  TouchableOpacity
+  TouchableOpacity,
+  ScrollView
 } from 'react-native';
 
 import Tabs from 'react-native-tabs';
@@ -51,13 +52,15 @@ export default class extends Component {
         />
         {
           refreshing ?<LoadingView />:
-          <View style={{flex: 1, marginTop: 45}}>
-            <UserInfoView {...info} 
-              onImgPress={()=>{setPreview(info.img)}}
-              onImgBlockPress={()=>{}}
-              onSignPress={()=>{}}
-            />
-          </View>
+          <ScrollView>
+            <View style={{flex: 1, marginTop: 50, marginBottom: 25}}>
+              <UserInfoView {...info} 
+                onImgPress={()=>{setPreview(info.img)}}
+                onImgBlockPress={()=>{}}
+                onSignPress={()=>{}}
+              />
+            </View>
+          </ScrollView>
         }
       </View>
 			

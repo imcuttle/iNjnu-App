@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
   Image,
   TouchableHighlight,
   TouchableWithoutFeedback
@@ -29,70 +30,77 @@ export default class BottomBar extends Component {
     sign: ''
   }
   render() {
-    const {img, name, classNo, department, commentNumber, discussNumber, id, sign, onImgPress, onImgBlockPress, onSignPress} = this.props;
+    const {
+      img, name, classNo, department, grade, create_time,
+      commentNumber, discussNumber, id, sign,
+      onImgPress, onImgBlockPress, onSignPress
+    } = this.props;
+    
     const rightArrow = <Image style={styles.rightArrow} source={require("../res/imgs/Forward.png")}/>
     const itemStyle = [styles.item, {height: 58}]
+    const enableStyle = {color: '#666'}
     return (
-      <View style={{flex: 1, marginTop: 10}}>
+      <ScrollView >
         
-        <View style={[itemStyle, {backgroundColor: 'rgba(255,255,255,0.8)', borderColor: '#ccc'}]}>
+        <View style={[{flex: 1, margin: 10}, styles.container]}>
           <TouchableHighlight
-            style={{minHeight: 120}}
             underlayColor="rgba(238,242,247,0.8)"
             onPress={onImgBlockPress}
           >
-            <Text style={styles.label}>头像</Text>
-            <TouchableWithoutFeedback onPress={onImgPress}>
-              <Image source={{uri: img}} style={[styles.img, {marginRight: 10}]}/>
-            </TouchableWithoutFeedback>
-            {rightArrow}
-          </TouchableHighlight>
-        </View>
-
-        <View style={itemStyle}>
-          <Text style={styles.label}>姓名</Text>
-          <Text style={styles.text}>{name}</Text>
-        </View>
-
-        <View style={itemStyle}>
-          <Text style={styles.label}>学号</Text>
-          <Text style={styles.text}>{id}</Text>
-        </View>
-
-        <View style={itemStyle}>
-          <Text style={styles.label}>班级</Text>
-          <Text style={styles.text}>{classNo}</Text>
-        </View>
-
-        <View style={itemStyle}>
-          <Text style={styles.label}>年级</Text>
-          <Text style={styles.text}>{grade}</Text>
-        </View>
-
-        <View style={[itemStyle, {borderBottomWidth: 0}]}>
-          <Text style={styles.label}>学院</Text>
-          <Text style={styles.text}>{department}</Text>
-        </View>
-
-        <TouchableHighlight
-          style={{minHeight: 120}}
-          onPress={onSignPress}
-          underlayColor="rgba(238,242,247,0.8)"
-        >
-          <View style={[styles.item, {
-            borderBottomWidth: 0, backgroundColor: 'rgba(255,255,255,0.8)',
-            flexDirection: 'column', marginTop: 20,
-            flex: 1, justifyContent: null, alignItems: null,
-          }]}>
-            <Text selectable={true} style={[styles.label, {height: 30, flex: -1}]}>个人公告</Text>
-            <View style={{flexDirection: 'row', flex: 1}}>
-              <Text style={[styles.text, {textAlign: 'left', marginLeft: 10, marginRight: 15,flex: 1}]}>{sign || '无介绍'}</Text>
+            <View style={[itemStyle, {backgroundColor: 'rgba(255,255,255,0.8)', borderColor: '#ccc'}]}>
+              <Text style={[styles.label, enableStyle]}>头像</Text>
+              <TouchableWithoutFeedback onPress={onImgPress}>
+                <Image source={{uri: img}} style={[styles.img, {marginRight: 10}]}/>
+              </TouchableWithoutFeedback>
               {rightArrow}
             </View>
-          </View>
-        </TouchableHighlight>
+          </TouchableHighlight>
+          
 
-      </View>
+          <View style={itemStyle}>
+            <Text style={styles.label}>姓名</Text>
+            <Text selectable={true} style={styles.text}>{name}</Text>
+          </View>
+
+          <View style={itemStyle}>
+            <Text style={styles.label}>学号</Text>
+            <Text selectable={true} style={styles.text}>{id}</Text>
+          </View>
+
+          <View style={itemStyle}>
+            <Text style={styles.label}>班级</Text>
+            <Text selectable={true} style={styles.text}>{classNo}</Text>
+          </View>
+
+          <View style={itemStyle}>
+            <Text style={styles.label}>年级</Text>
+            <Text selectable={true} style={styles.text}>{grade}</Text>
+          </View>
+
+          <View style={itemStyle}>
+            <Text style={styles.label}>学院</Text>
+            <Text selectable={true} style={styles.text}>{department}</Text>
+          </View>
+
+          <TouchableHighlight
+            style={[styles.item, {
+              borderBottomWidth: 0, backgroundColor: 'rgba(255,255,245,0.8)',
+              flexDirection: 'column', marginTop: 20,
+              flex: 1, justifyContent: null, alignItems: null,
+            }]}
+            onPress={onSignPress}
+            underlayColor="rgba(238,242,247,0.8)"
+          >
+            <View >
+              <Text style={[styles.label, {height: 30, flex: -1}, enableStyle]}>个人公告</Text>
+              <View style={{flexDirection: 'row', flex: 1}}>
+                <Text selectable={true} style={[styles.text, {textAlign: 'left', marginLeft: 10, marginRight: 15,flex: 1}]}>{sign || '无介绍'}</Text>
+                {rightArrow}
+              </View>
+            </View>
+          </TouchableHighlight>
+        </View>
+      </ScrollView>
     )
   }
 
@@ -102,13 +110,18 @@ export default class BottomBar extends Component {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    
+  },
   item: {
-    borderBottomWidth: 1,
+    borderBottomWidth: .5,
+    // borderLeftWidth: .5,
+    // borderRightWidth: .5,
     borderColor: '#C0C0C0',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
     paddingVertical: 8,
     backgroundColor: '#E0E0E0'
   },

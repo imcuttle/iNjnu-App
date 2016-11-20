@@ -10,9 +10,62 @@ var Toast = Platform.select({
 
 var host = "http://192.168.2.100:9669";
 var DEV = true
-
+var ImagePicker = require('react-native-image-picker');
 
 var utils = {
+	imagePick(title, opts) {
+		var options = {
+          title: title || '请选择照片',
+          cancelButtonTitle: '取消',
+          takePhotoButtonTitle: '拍照',
+          chooseFromLibraryButtonTitle: '选择照片',
+          quality: 1.0,
+          allowsEditing: false
+        };
+        return new Promise((resolve, reject) => {
+        	if(this.__imgpickLock===true) {
+	        	resolve(false);
+	        	return
+	        }
+	        this.__imgpickLock = true
+        	ImagePicker.showImagePicker({...options, ...opts}, (response) => {
+        	  this.__imgpickLock = false
+	          console.log('Response = ', response);
+
+	          if (response.didCancel) {
+	            console.log('User cancelled image picker');
+	          }
+	          else if (response.error) {
+	          	DEV && this.toast(response.error)
+	            console.log('ImagePicker Error: ', response.error);
+	          }
+	          else if (response.customButton) {
+	            console.log('User tapped custom button: ', response.customButton);
+	          } else {
+	            // You can display the image using either data...
+	            const source = {uri: `data:${response.type};base64,` + response.data, isStatic: true};
+
+	            // or a reference to the platform specific asset location
+	            if (Platform.OS === 'ios') {
+	              const source = {uri: response.uri.replace('file://', ''), isStatic: true};
+	            } else {
+	              const source = {uri: response.uri, isStatic: true};
+	            }
+
+	            resolve(source)
+	          }
+
+	          if(response.didCancle) {
+	          	resolve(false)
+	          } else if(response.error) {
+	          	reject(response.error)
+	          }
+
+	          
+	        });
+        })
+        
+	},
 	isLogin: function() {
 		db.set('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5MTMwMTI2IiwicGFzc3dvcmQiOiJwaWd5YzY3MDgifQ.p-WzUJ5ZGCKotpiR_FMpgop1n3YZZAzhSLUeB0qxHWM')
 		return db.get('token')

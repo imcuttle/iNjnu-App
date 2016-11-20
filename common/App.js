@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {Map} from 'immutable'
 import ImagePreview from 'react-native-image-preview'
+import Popup from 'react-native-popup'
 
 import LoginForm from './components/LoginForm'
 
@@ -42,6 +43,7 @@ export default class App extends Component {
     super(props)
     this.renderLoginForm = this.renderLoginForm.bind(this)
     this.setDiscussProps = this.setDiscussProps.bind(this)
+    this.confirm = this.confirm.bind(this)
   }
   componentWillMount() {
   	utils.isLogin()
@@ -106,9 +108,9 @@ export default class App extends Component {
                   } else if(active === 'discussMain') {
                     Page = <DiscussMainPage navigator={navigator} route={route}
                       setDiscussProps={this.setDiscussProps}
+                      confirm={this.confirm}
                       setProps={(props)=>{
                         var ent = discussMainProps[route.params.id] || {}
-
                         this.setState({
                           discussMainProps: Map(discussMainProps).set(route.params.id, Object.assign({}, ent, props)).toJS()
                         })
@@ -131,12 +133,29 @@ export default class App extends Component {
                 <View style={{flex: 1}}>
                   {Page}
                   {!!preview && <ImagePreview visable={!!preview} source={{uri: preview}} close={()=>this.setState({preview: ''})}/>}
+                  <Popup ref={popup => this.popup = popup } isOverlayClickClose={false}/>
                 </View>
               )
             }
           }
         />
     );
+  }
+
+  confirm(title='title', onOk, onCancel) {
+    this.popup.confirm({
+        title: title,
+        ok: { text: '确定', style: {color: 'green'},
+            callback: onOk,
+        },
+        cancel: {
+            text: '取消',
+            style: {
+                color: 'red'
+            },
+            callback: onCancel,
+        },
+    });
   }
   renderLoginForm() {
   	return (
