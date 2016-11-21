@@ -259,7 +259,7 @@ export default class extends React.Component {
 							/>
 							
 							<TouchableHighlight
-								style={{width: 60, height: 36,
+								style={{paddingLeft: 15, paddingRight: 15, height: 36,
 									borderTopRightRadius: 8, borderBottomRightRadius: 8,
 									justifyContent:'center', 
 									borderWidth: 0, padding: 6, backgroundColor: bgcolor}}

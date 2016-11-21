@@ -28,6 +28,7 @@ import PersonPage from './pages/PersonPage'
 import ChatPage from './pages/ChatPage'
 import DeployPage from './pages/DeployPage'
 import LookupScorePage from './pages/LookupScorePage'
+import LookupFacePage from './pages/LookupFacePage'
 import UserInfoPage from './pages/UserInfoPage'
 import UserDiscussPage from './pages/UserDiscussPage'
 import EditSignPage from './pages/EditSignPage'
@@ -47,6 +48,11 @@ export default class App extends Component {
     personProps: {
       info: {},
       refreshing: true,
+    },
+    lookupFaceProps: {
+      images: [],
+      url: '',
+      fetching: false
     },
     navigator: null
   }
@@ -100,11 +106,11 @@ export default class App extends Component {
     })
   }
   render() {
-  	const {loading, login, personProps, discussProps, friendProps, deployProps, preview, discussMainProps} = this.state;
+  	const {loading, lookupFaceProps, login, personProps, discussProps, friendProps, deployProps, preview, discussMainProps} = this.state;
 
     return (
         <Navigator
-          initialRoute={{active: 'person', title: "iNjnu", params: {id: '19130126'}}}
+          initialRoute={{active: 'lookup', title: "iNjnu", params: {id: '19130126'}}}
           renderScene={(route, navigator) => {
               if(!this.navigator) {
                 this.navigator = navigator
@@ -205,6 +211,18 @@ export default class App extends Component {
                         }})
                       }
                       navigator={navigator} initVal={route.params.initVal}/>
+                  } else if(active === 'lookupFace') {
+
+                    Page = <LookupFacePage
+                      setPreview={(preview)=>this.setState({preview})}
+                      setProps={(p)=>
+                        this.setState({
+                          lookupFaceProps: {...lookupFaceProps, ...p}
+                        })
+                      }
+                      {...lookupFaceProps}
+                      navigator={navigator} 
+                    />
                   }
                 }
               }

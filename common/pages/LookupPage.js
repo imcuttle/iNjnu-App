@@ -49,6 +49,14 @@ export default class extends Component {
                     active: 'lookupScore'
                   })
                 }
+              }, {
+                img: 'https://facebook.github.io/react/img/logo_og.png',
+                name: '撞脸秀',
+                onPress: (data)=>{
+                  navigator.push({
+                    active: 'lookupFace'
+                  })
+                }
               }]}
               style={{flex: 1}}></Grid>
           </View>

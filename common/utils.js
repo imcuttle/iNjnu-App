@@ -10,6 +10,7 @@ var Toast = Platform.select({
 
 
 var host = "http://192.168.2.100:9669";
+// db.set('host', )
 var DEV = true
 var ImagePicker = require('react-native-image-picker');
 
@@ -22,7 +23,6 @@ var utils = {
           chooseFromLibraryButtonTitle: '选择照片',
           quality: 1.0,
           allowsEditing: false,
-          rotation: false,
         };
         return new Promise((resolve, reject) => {
         	if(this.__imgpickLock===true) {
@@ -73,7 +73,6 @@ var utils = {
         
 	},
 	isLogin: function() {
-		db.set('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5MTMwMTI2IiwicGFzc3dvcmQiOiJwaWd5YzY3MDgifQ.p-WzUJ5ZGCKotpiR_FMpgop1n3YZZAzhSLUeB0qxHWM')
 		return db.get('token')
 		.then(token=>{
 			return this.fetchCheckTocken(token);
@@ -391,7 +390,6 @@ var utils = {
 		)
 	},
 	fetchUpdateSign(sign) {
-
 		return db.get('token').then((token) => 
 			fetch(this.urls.infoset, {
 				method: 'POST',
@@ -417,10 +415,62 @@ var utils = {
 			})
 		)
 	},
+	fetchFaceBase64(data, type, size) {
+		return db.get('token').then((token) => 
+			fetch(this.urls.facebase64, {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+    				'Content-Type': 'application/x-www-form-urlencoded',
+    				'authorization': token
+				},
+				body: qs.stringify({data,type,size})
+			})
+			.then(res => res.json())
+			.then(json=>{
+				if(json.code===200) {
+					return json.result;
+				} else {
+					this.toast(json.result);
+					return;
+				}
+			}).catch(err=>{
+				DEV && this.toast(err.message)
+				return;
+			})
+		)
+	},
+	fetchFaceUrl(data) {
+		return db.get('token').then((token) => 
+			fetch(this.urls.faceurl, {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+    				'Content-Type': 'application/x-www-form-urlencoded',
+    				'authorization': token
+				},
+				body: qs.stringify({data})
+			})
+			.then(res => res.json())
+			.then(json=>{
+				if(json.code===200) {
+					return json.result;
+				} else {
+					this.toast(json.result);
+					return;
+				}
+			}).catch(err=>{
+				DEV && this.toast(err.message)
+				return;
+			})
+		)
+	},
 	urlStringify(json) {
 		return Object.getOwnPropertyNames(json).map(k=>k+'='+(!!json[k]?json[k]:'')).join('&')
 	},
 	urls: {
+		facebase64: host+'/api/face/base64',
+		faceurl: host+'/api/face/url',
 		infoset: host+'/api/info/set',
 		upbase64head: host+'/api/upload/head/base64',
 		deldiscuss: host+'/api/discuss/del',

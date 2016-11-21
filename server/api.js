@@ -337,5 +337,52 @@ api.post('/upload/head/base64', (req, res) => {
 	}
 })
 
+api.post('/face/base64', (req, res) => {
+	var tokenJson = req.tokenJson;
+	var sender = tokenJson.id, password = tokenJson.password;
+	var ent = req.body;
+	var data = ent.data, size = ent.size;
+
+	if(!data) {
+		res.json(obj(400, '数据为空'))
+	} else {
+		data = decodeBase64Image(data)
+		if(!data.type.startsWith('image')) {
+			res.json(obj(400, '请上传正确的图片数据'))
+		} else if (data.data.length>1024*1024*5) {
+			res.json(obj(400, '图片数据不能大于5M'))
+		} else {
+			var filename = `${sender+'-'+Date.now()}.${p.basename(data.type)}`
+			njnu.faceMatch(data.data, data.type, data.data.length, filename)
+			.then(list=>obj(200, list))
+			.catch(err=>obj(502, err.message))
+			.then(x=>{
+				res.json(x)
+			})
+		}
+	}
+})
+
+api.post('/face/url', (req, res) => {
+	var tokenJson = req.tokenJson;
+	var sender = tokenJson.id, password = tokenJson.password;
+	var ent = req.body;
+	var data = ent.data;
+
+	if(!data) {
+		res.json(obj(400, '地址为空'))
+	} else {
+		if(!data.startsWith("http")) {
+			res.json(obj(400, '请使用正确的图片地址'))
+			return
+		}
+		njnu.faceMatchUrl(data)
+		.then(list=>obj(200, list))
+		.catch(err=>obj(502, err.message))
+		.then(x=>{
+			res.json(x)
+		})
+	}
+})
 
 module.exports = api;

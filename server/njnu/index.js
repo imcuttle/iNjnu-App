@@ -1,10 +1,24 @@
 const spider = require('../spider')
 const URL = "http://njnu.chaiziyi.com.cn/getscores";
+const FURL = "http://njnu.chaiziyi.com.cn/face"
+const HOST = "http://njnu.chaiziyi.com.cn"
+const LOGINURL ="http://njnu.chaiziyi.com.cn/login"
+
+var crypto = require('crypto');
+function md5 (text) {
+	return crypto.createHash('md5').update(text).digest('hex');
+};
+
 const CACHE = {
 	checkStudent: {},
 	info: {},
-	score: {}
+	score: {},
+	faceUrl: {},
+	faceMd5: {}
 }
+
+var FormData = require('form-data');
+
 
 setInterval(() => {
 	Object.getOwnPropertyNames(CACHE)
@@ -12,9 +26,38 @@ setInterval(() => {
 }, 1000*60*60*24*7)
 
 module.exports = {
-	getToken() {
-		return spider.get(URL, {}, 'jq')
-			.then($ => $('[name=csrfmiddlewaretoken]').val())
+	getToken(url) {
+		url = url || URL
+		return spider.get(url, {}, 'jq')
+		.then($=>{
+			return $;
+		})
+		.then($ => $('[name=csrfmiddlewaretoken]').val())
+	},
+	getFCookie() {
+		return this.getToken(LOGINURL).then(t=>{
+			return spider
+				.post(LOGINURL, {csrfmiddlewaretoken: t, username: 'yucong', password: 'moyuyc'}, '', {
+					Cookie: `csrftoken=${t}`,
+					"Content-Type": "application/x-www-form-urlencoded",
+				}, true)
+				.then(headers=>{
+					return Array.isArray(headers['set-cookie'])?headers['set-cookie']:[headers['set-cookie']]
+				}).then(cookies=> cookies.map(cookie=> {
+					var m = cookie.match(/(?:sessionid|csrftoken)=.*?;/)
+					m = m?m[0]:''
+					if(m.startsWith('csrftoken=')) {
+						t = m.replace(/^csrftoken=/, '').replace(/;$/, '')
+					}
+					return m;
+				}).join(' '))
+				.then(c=>{
+					return {
+						token: t,
+						cookie: c
+					}
+				})
+		})
 	},
 	checkStudent(id, password) {
 		if(CACHE.checkStudent[`${id}-${password}`] != null) {
@@ -38,6 +81,7 @@ module.exports = {
 				}
 			))
 	},
+
 	getStudentInfo(id, password) {
 		if(CACHE.info[`${id}-${password}`] != null) {
 			return new Promise(r=>r(CACHE.info[`${id}-${password}`]))
@@ -91,5 +135,59 @@ module.exports = {
 				CACHE.score[`${id}-${password}`] = o
 				return o
 			})
+	},
+	faceMatch(data, type, size) {
+		var _md5 = md5(data)
+		if(CACHE.faceMd5[_md5]!=null) {
+			return Promise.resolve(CACHE.faceMd5[_md5])
+		}
+		return this.getFCookie()
+		.then(ct=>{
+			console.info('DATAMATCH', ct)
+			var form = new FormData();
+			form.append("csrfmiddlewaretoken", ct.token);
+			form.append("info_photo", data, {
+				filename: `iNjnu-app-${filename}`,
+				contentType: type,
+				knownLength: +size
+			});
+			return spider.postFormData(FURL, 'jq', form, {'Cookie': ct.cookie})
+			.then($=>this.parseFaceHtml($))
+		}).then(o=>{
+			CACHE.faceMd5[_md5]!=o
+			return o
+		})
+	},
+	faceMatchUrl(url) {
+		if(CACHE.faceUrl[url] != null) {
+			return new Promise(r=>r(CACHE.faceUrl[url]))
+		}
+		return this.getFCookie()
+		.then(ct=>{
+			console.info('URLMATCH', ct)
+			return spider.post(FURL, {csrfmiddlewaretoken: ct.token, url}, 'jq', {
+				'Cookie': ct.cookie,
+				'Content-Type': 'application/x-www-form-urlencoded'
+			})
+			.then($=>this.parseFaceHtml($))
+		}).then(o=>{
+			CACHE.faceUrl[url] = o
+			return o
+		})
+
+
+	},
+	parseFaceHtml($) {
+		var arr = []
+		$('div[align=middle]').map((i, div)=>{
+			var src = $(div).find('img[src]').attr('src')
+			var text = $(div).find('h6').text()
+			arr.push({
+				src: src.startsWith("http")?src:HOST+src,
+				text
+			})
+		})
+		console.log(arr)
+		return arr
 	}
 }

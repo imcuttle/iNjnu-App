@@ -31,13 +31,13 @@ module.exports = {
 		})
 	},
 
-	get(url, params, type) {
+	get(url, params, type, headers) {
 		return new Promise(resolve => {
 			request(
-				u.parse(url), 
+				Object.assign({},u.parse(url), {headers: headers || {}}),
 				res => {
 					if(res.statusCode!==200) {
-						console.error('POST', res.statusCode, url, JSON.stringify(params))
+						console.error('GET', res.statusCode, url, JSON.stringify(params))
 					}
 	                var chunks = [];
 	                res.on('data', function(chunk) {
@@ -56,10 +56,9 @@ module.exports = {
 			).end();
 		})
 	},
-
-	post(url, params, type, headers) {
+	post(url, params, type, headers, getHeader) {
 		return new Promise(resolve => {
-			request(
+			var req = request(
 				Object.assign(u.parse(url), {
 					method: 'POST',
 					headers: headers || {}
@@ -67,6 +66,10 @@ module.exports = {
 				res => {
 					if(res.statusCode!==200) {
 						console.error('POST', res.statusCode, url, JSON.stringify(params))
+					}
+					if(getHeader) {
+						resolve(res.headers)
+						return
 					}
 					var chunks = [];
 					res.on('data', function(chunk) {
@@ -82,7 +85,46 @@ module.exports = {
 					})
 
 				}
-			).end(querystring.stringify(params));
+			)
+			req.on('connect', ()=>console.log('connect'))
+			req.on('abort', ()=>console.log('abort'))
+			req.on('aborted', ()=>console.log('aborted'))
+			req.setSocketKeepAlive(true)
+			req.end(querystring.stringify(params));
+		})
+	},
+	postFormData(url, type, form, headers, getHeader) {
+		return new Promise(resolve=>{
+			var req = request(Object.assign({}, u.parse(url), {
+				method: 'POST',
+				headers: Object.assign({}, headers, form.getHeaders())
+			}))
+			// form.pipe(require('fs').createWriteStream('test.txt'))
+			form.pipe(req)
+			req.on('response', res => {
+				if(getHeader) {
+					resolve(res.headers)
+					return
+				}
+				if(res.statusCode!==200) {
+					console.error('FORMDATA', res.statusCode, url, JSON.stringify(res.headers))
+					console.error(JSON.stringify(req._headers))
+				}
+				var chunks = [];
+				res.on('data', function(chunk) {
+					chunks.push(chunk);
+				});
+				res.on('end', function() {
+					var html = Buffer.concat(chunks).toString();
+					if(type==='jq') {
+						resolve($.load(html))
+					} else {
+						resolve(html);
+					}
+				})
+			})
 		})
 	}
+
 }
+
