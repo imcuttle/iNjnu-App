@@ -101,9 +101,17 @@ export default class extends React.Component {
 			        			 		.then(x=>{
 			        			 			if(x) {
 			        			 				setProps({fetching: false, images: x})
-			        			 				navigator.replace({
-			        			 					active: 'lookupFace'
-			        			 				})
+			        			 				var rs = navigator.getCurrentRoutes()
+			        			 				var i = rs.findIndex(r=>r.active==='lookupFace')
+			        			 				if(i>=0) {
+			        			 					navigator.replaceAtIndex({
+			        			 						active: 'lookupFace'
+			        			 					}, i)
+			        			 				} else {
+			        			 					navigator.push({
+			        			 						active: 'lookupFace'
+			        			 					})
+			        			 				}
 			        			 			} else 
 			        			 				setProps({fetching: false})
 			        			 		})
@@ -140,9 +148,18 @@ export default class extends React.Component {
 		        			 		.then(x=>{
 		        			 			if(x) {
 		        			 				setProps({fetching: false, images: x})
-		        			 				navigator.replace({
-		        			 					active: 'lookupFace'
-		        			 				})
+		        			 				
+		        			 				var rs = navigator.getCurrentRoutes()
+		        			 				var i = rs.findIndex(x=>x.active==='lookupFace')
+		        			 				if(i>=0) {
+		        			 					navigator.replaceAtIndex({
+		        			 						active: 'lookupFace'
+		        			 					}, i)
+		        			 				} else {
+		        			 					navigator.push({
+		        			 						active: 'lookupFace'
+		        			 					})
+		        			 				}
 		        			 			} else 
 		        			 				setProps({fetching: false})
 		        			 		})
@@ -183,7 +200,7 @@ export default class extends React.Component {
 	        					enableEmptySections={true}
 	        					keyboardDismissMode="on-drag"
 	        					
-	        					dataSource={new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(images.slice(1, images.length))}
+	        					dataSource={new ListView.DataSource({rowHasChanged: (r1, r2) => !Map(r1).equals(Map(r2))}).cloneWithRows(images.slice(1, images.length))}
 	        					renderRow={(rowData)=>{
 	        						
 	        						return  <View style={styles.item}>
