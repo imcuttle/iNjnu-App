@@ -198,7 +198,7 @@ export default class extends React.Component {
 										title: comment.user.name
 									})
 								}}
-								onDelPress={comment.user.id==discuss.sender.id?()=>{
+								onDelPress={route.params.comment.user.id==discuss.sender.id?()=>{
 									var i = this.delList.findIndex(x=>x===comment.id)
 				                	if(i>=0) {
 				                		utils.toast(':) 正在处理中...')
@@ -308,18 +308,18 @@ export default class extends React.Component {
 		//title, time, name, img, commentNumber=0, content
 	}
 	mapDiscuss(discuss) {
-		const {comments, commentNumber, selfId, navigator, setDiscussProps, confirm} = this.props
+		const {comments, route, commentNumber, selfId, navigator, setDiscussProps, confirm} = this.props
 		if(!discuss) {
 			return {}
 		}
 		return {
-			onDelPress: discuss.sender.id==selfId?()=>{
+			onDelPress: discuss.sender.id==selfId && !route.params.noDel ?()=>{
 				var i = this.delList.findIndex(x=>x.id===discuss.id)
             	if(i>=0) {
             		utils.toast(':) 正在处理中...')
             		return;
             	}
-				confirm('确定删除该评论？',
+				confirm('确定删除该帖子？',
 	                () => {
 	                	this.delList.push({id: discuss.id})
                 		utils.fetchDelDiscuss(discuss.id)

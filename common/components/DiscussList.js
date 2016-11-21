@@ -16,6 +16,7 @@ import {
 
 import LoadingView from './LoadingView'
 import Discuss from './Discuss'
+import UserDiscuss from './UserDiscuss'
 import {Map,List} from 'immutable'
 import moment from 'moment'
 
@@ -35,7 +36,9 @@ export default class extends Component {
     hasmore: true,
     refreshing: false,
     loadmore: false,
-    focusRefresh: false
+    focusRefresh: false,
+    isMyDiscuss: false,
+    params: {}
   }
 
   state = {
@@ -78,7 +81,10 @@ export default class extends Component {
     const {setProps, ds, hasmore} = this.props
     if(hasmore&&ds.length===0) {
       this._addList()
-    } 
+    }
+  }
+  componentDidUpdate() {
+    const {setProps, ds, hasmore} = this.props
   }
   componentWillReceiveProps(nextProps) {
     const {setProps, focusRefresh} = nextProps;
@@ -88,7 +94,8 @@ export default class extends Component {
   }
 
   render() {
-    const {ds, loadmore, refreshing, hasmore} = this.props;
+    const {ds, loadmore, refreshing, params, hasmore} = this.props;
+    const {id, number, isSelf, name} = params;
     const {style} = this.props;
     const {size} = this.state
     if(hasmore && ds.length===0) {
@@ -107,17 +114,22 @@ export default class extends Component {
         showsVerticalScrollIndicator={true}
         removeClippedSubviews={true}
         onChangeVisibleRows={(visibleRows, changedRows)=>{
-          alert('onChangeVisibleRows')
+          // alert('onChangeVisibleRows')
           // console.log(visibleRows, changedRows);
           // highlightRow(null);
         }}
         onEndReached={()=>{
-          if(!hasmore) {
-            utils.toast('已经没数据啦！')
-          }
+          
           ds.length!==0 && !loadmore && this._addList();
         }}
-        renderHeader={()=><View style={{height: 5}}/>}
+        renderHeader={()=>{
+          if(!hasmore && ds.length === 0) {
+            return <View style={{alignItems: 'center', marginTop: 30}}>
+              <Text style={{fontSize: 18, color: 'red'}}>对不起，暂无数据</Text>
+            </View>
+          }
+          return <View style={{height: 5}}/>
+        }}
         onEndReachedThreshold={100}
         renderFooter={()=>{
           if(!hasmore)
@@ -145,42 +157,65 @@ export default class extends Component {
     return !Map(this.props).equals(Map(nextProps))
   }
   _onRefresh() {
-    const {setProps, hasmore, ds} = this.props;
+    const {setProps, hasmore, ds, params} = this.props;
+    const {id, number, isSelf, name} = params;
     const {size} = this.state;
     const len = size*2
 
     setProps({refreshing: true, focusRefresh: false})
-    utils.fetchDiscussList(1, len)
-    .then(discusses=>{
+    var promise;
+    if(!id) {
+      promise = utils.fetchDiscussList(1, len)
+    } else {
+      promise = utils.fetchUserDiscussList(id, 1, len)
+    }
+    
+    promise.then(discusses=>{
       this._setNewList(discusses, true)
       setProps({refreshing: false})
     })
   }
 
-  _setNewList(discusses, replace) {
-    const {setProps, hasmore, ds} = this.props;
 
-    var newData = discusses.map(discuss=>{return {
-      img: discuss.sender.img,
-      id: discuss.id,
-      sender: discuss.sender.id,
-      summary: discuss.summary,
-      name: discuss.sender.name,
-      title: discuss.title,
-      tip: (discuss.echotime?'最后回复 ':'发表于 ')+moment(discuss.echotime || discuss.datetime).locale('zh-cn', require('moment/locale/zh-cn')).fromNow()
-    }})
+  _setNewList(discusses, replace) {
+    const {setProps, hasmore, ds, params} = this.props;
+    const {id, number, isSelf, name} = params;
+    var newData;
+    if(!id) {
+      newData = discusses.map(discuss=>{return {
+        img: discuss.sender.img,
+        id: discuss.id,
+        sender: discuss.sender.id,
+        summary: discuss.summary,
+        name: discuss.sender.name,
+        title: discuss.title,
+        tip: (discuss.echotime?'最后回复 ':'发表于 ')+moment(discuss.echotime || discuss.datetime).locale('zh-cn', require('moment/locale/zh-cn')).fromNow()
+      }})
+    } else {
+      newData = discusses.map(discuss=>{return {
+        img: discuss.sender.img,
+        id: discuss.id,
+        sender: discuss.sender.id,
+        summary: discuss.summary,
+        name: discuss.sender.name,
+        title: discuss.title,
+        tip: '发表于'+moment(discuss.datetime).format('YYYY-MM-DD HH:mm')
+      }})
+    }
 
     if(discusses.length===0) {
-      setProps({loadmore: false, hasmore: false})
+      setProps({loadmore: false, hasmore: false, refreshing: false})
     } else {
       setProps({ds: !replace?ds.concat(newData): newData, loadmore: false, hasmore: true})
     }
   }
 
   _addList() {
-    const {setProps, hasmore, ds} = this.props;
+    const {setProps, hasmore, ds, params} = this.props;
+    const {id, number, isSelf, name} = params;
     const {size} = this.state;
     if(!hasmore) {
+      utils.toast('已经没数据啦！')
       return;
     }
 
@@ -189,37 +224,80 @@ export default class extends Component {
       return;
     }
     setProps({loadmore: true, refreshing: false});
-    utils.fetchDiscussList((ds.length/size)+1, size, ds.length>0?ds[ds.length-1].id:null)
-    .then(discusses=>{
+    var promise;
+    if(!id) {
+      promise = utils.fetchDiscussList((ds.length/size)+1, size, ds.length>0?ds[ds.length-1].id:null)
+    } else {
+      promise = utils.fetchUserDiscussList(id, (ds.length/size)+1, size, ds.length>0?ds[ds.length-1].id:null)
+    }
+    
+    promise.then(discusses=>{
       this._setNewList(discusses)
     })
   }
   renderItem(rowData, sectionID, rowID, highlightRow) {
-    const {navigator} = this.props
+    const {navigator, params, setProps, sumNumber, ds, rmDisscuss, deltaSumNumber, deltaDiscussNumber} = this.props
+    const {id, number, isSelf, name} = params;
   	var style = {paddingHorizontal: 12, paddingVertical: 6}
-  	
-  	return (
-  		<Discuss {...rowData} 
-        onPress={()=>{
-          navigator.push({
-            active: 'discussMain',
-            title: rowData.title,
-            params: {
-              id: rowData.id
-            }
-          })
-        }}
-        onImgPress={()=>{
-          navigator.push({
-            active: 'userInfo',
-            title: rowData.name,
-            params: {
-              id: rowData.sender
-            }
-          })
-        }}
-      />
-  	)
+    // alert(JSON.stringify(params))
+  	if(!id) 
+    	return (
+    		<Discuss {...rowData} 
+          onPress={()=>{
+            navigator.push({
+              active: 'discussMain',
+              title: rowData.title,
+              params: {
+                id: rowData.id
+              }
+            })
+          }}
+          onImgPress={()=>{
+            navigator.push({
+              active: 'userInfo',
+              title: rowData.name,
+              params: {
+                id: rowData.sender
+              }
+            })
+          }}
+        />
+    	)
+    else
+      return (
+        <UserDiscuss {...rowData} 
+          onPress={()=>{
+            navigator.push({
+              active: 'discussMain',
+              title: rowData.title,
+              params: {
+                id: rowData.id,
+                noDel: true,
+              }
+            })
+          }}
+          onDelPress={()=>{
+            utils.fetchDelDiscuss(rowData.id)
+            .then(f=>{
+              if(f) {
+                var list = List(ds)
+                var i = list.toArray().findIndex(x=>x.id===rowData.id)
+                if(i>=0){
+                  list = list.remove(i).toArray()
+                  if(list.length===0) {
+                    setProps({hasmore: false, ds: []})
+                  } else {
+                    setProps({ds: list})
+                  }
+                  deltaSumNumber(-1)
+                  deltaDiscussNumber(-1)
+                  rmDisscuss(rowData.id)
+                }
+              }
+            })
+          }}
+        />
+      )
   }
 }
 

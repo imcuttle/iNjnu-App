@@ -5,9 +5,13 @@ import {
   Text,
   View,
   Picker,
+  Platform,
+  BackAndroid,
   Navigator
 } from 'react-native';
-import {Map} from 'immutable'
+
+
+import {Map,List} from 'immutable'
 import ImagePreview from 'react-native-image-preview'
 import Popup from 'react-native-popup'
 
@@ -25,6 +29,8 @@ import ChatPage from './pages/ChatPage'
 import DeployPage from './pages/DeployPage'
 import LookupScorePage from './pages/LookupScorePage'
 import UserInfoPage from './pages/UserInfoPage'
+import UserDiscussPage from './pages/UserDiscussPage'
+import EditSignPage from './pages/EditSignPage'
 
 require('./workers');
   
@@ -37,15 +43,45 @@ export default class App extends Component {
     deployProps: {},
     friendProps: {},
     discussMainProps: {},
-    preview: ''
+    preview: '',
+    personProps: {
+      info: {},
+      refreshing: true,
+    },
+    navigator: null
   }
   constructor(props) {
     super(props)
     this.renderLoginForm = this.renderLoginForm.bind(this)
     this.setDiscussProps = this.setDiscussProps.bind(this)
+    this.setPersonProps = this.setPersonProps.bind(this)
     this.confirm = this.confirm.bind(this)
+    this.onBackAndroid = this.onBackAndroid.bind(this)
+  }
+  onBackAndroid() {
+
+    if(this.navigator) {
+      if(this.navigator.getCurrentRoutes().length>1) {
+        this.navigator.pop()
+        return true;
+      }
+    }
+    if (this.lastBackPressed && this.lastBackPressed + 2000 >= Date.now()) {
+      return false;
+    }
+    this.lastBackPressed=Date.now()
+    utils.toast('再按一次退出应用');
+    return true;
+  }
+  componentWillUnmount() {
+
+    if(Platform.OS==='android')
+      BackAndroid.removeEventListener('hardwareBackPress', this.onBackAndroid);
   }
   componentWillMount() {
+    if(Platform.OS==='android')
+      BackAndroid.addEventListener('hardwareBackPress', this.onBackAndroid);
+
   	utils.isLogin()
   	.then(login=>{
       this.setState({login: login, loading: false})
@@ -56,15 +92,23 @@ export default class App extends Component {
     this.setState({
       discussProps: Object.assign({}, discussProps, props)
     })
-    
+  }
+  setPersonProps(props) {
+    const {personProps} = this.state
+    this.setState({
+      personProps: Object.assign({}, personProps, props)
+    })
   }
   render() {
-  	const {loading, login, discussProps, friendProps, deployProps, preview, discussMainProps} = this.state;
+  	const {loading, login, personProps, discussProps, friendProps, deployProps, preview, discussMainProps} = this.state;
 
     return (
         <Navigator
           initialRoute={{active: 'person', title: "iNjnu", params: {id: '19130126'}}}
           renderScene={(route, navigator) => {
+              if(!this.navigator) {
+                this.navigator = navigator
+              }
               let active = route.active, title = route.title, params = route.params;
               let Page;
               if(loading) {
@@ -90,8 +134,10 @@ export default class App extends Component {
                     Page = <PersonPage 
                       route={route} 
                       navigator={navigator} 
+                      setProps={this.setPersonProps}
                       setParentState={this.setState.bind(this)} 
                       setPreview={(preview)=>this.setState({preview})}
+                      {...personProps}
                     />
                   } else if(active === 'chat') {
                     Page = <ChatPage route={route} navigator={navigator} />
@@ -126,6 +172,39 @@ export default class App extends Component {
                       setPreview={(preview)=>this.setState({preview})}
                       navigator={navigator} route={route}
                     />
+                  } else if(active === 'userDiscussList') {
+                    Page = <UserDiscussPage 
+                      deltaDiscussNumber={(n)=>{
+                        personProps.info && personProps.info.discussNumber 
+                        && this.setPersonProps({
+                          info: {
+                            ...personProps.info, 
+                            discussNumber: personProps.info.discussNumber-1
+                          }
+                        })
+                      }}
+                      rmDisscuss={(id)=>{
+                        var newData = List(discussProps.ds||[])
+                        var i = newData.toArray().findIndex(x=>x.id==id)
+                        if(i>=0)
+                          newData = newData.remove(i)
+                        this.setDiscussProps({
+                          ...discussProps,
+                          ds: newData.toArray()
+                        })
+                      }}
+                      navigator={navigator} params={route.params}
+                    />
+                  } else if(active === 'editSign') {
+                    Page = <EditSignPage 
+                      setSign={(s)=>
+                        personProps.info 
+                        && this.setPersonProps({info: {
+                          ...personProps.info,
+                          sign: s
+                        }})
+                      }
+                      navigator={navigator} initVal={route.params.initVal}/>
                   }
                 }
               }

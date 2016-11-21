@@ -57,8 +57,22 @@ module.exports = {
         size = +size;
         return new Promise((resolve, reject) => {
             conn.query(
-                `select * from ?? ${previd!=null?'where datetime<(select datetime from ?? where id=?) ':''}order by datetime desc limit ?,?`,
-                previd!=null?[table, table, +previd, 0, size]:[table, page*size, size],
+                `select * from ?? ${!!previd?'where datetime<(select datetime from ?? where id=?) ':''}order by datetime desc limit ?,?`,
+                !!previd?[table, table, +previd, 0, size]:[table, page*size, size],
+                (err, rlt) => {
+                    if(err) {console.error(err); reject(err)}
+                    else resolve(rlt.length===0 ? null: rlt);
+                }
+            )
+        })
+    },
+    listByUser(id, page, size, previd) {
+        page--;
+        size = +size;
+        return new Promise((resolve, reject) => {
+            conn.query(
+                `select * from ?? where ${!!previd?'datetime<(select datetime from ?? where id=?) and':''} sender=? order by datetime desc limit ?,?`,
+                !!previd?[table, table, +previd, id, 0, size]:[table, id, page*size, size],
                 (err, rlt) => {
                     if(err) {console.error(err); reject(err)}
                     else resolve(rlt.length===0 ? null: rlt);

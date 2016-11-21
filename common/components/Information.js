@@ -33,12 +33,14 @@ export default class BottomBar extends Component {
     const {
       img, name, classNo, department, grade, create_time,
       commentNumber, discussNumber, id, sign,
-      onImgPress, onImgBlockPress, onSignPress
+      onImgPress, onImgBlockPress, onSignPress,
+      onDiscussPress, onComentPress
     } = this.props;
     
     const rightArrow = <Image style={styles.rightArrow} source={require("../res/imgs/Forward.png")}/>
     const itemStyle = [styles.item, {height: 58}]
     const enableStyle = {color: '#666'}
+    const enabelItem = [itemStyle, {backgroundColor: 'rgba(255,255,255,0.8)', borderColor: '#ccc'}]
     return (
       <ScrollView >
         
@@ -47,7 +49,7 @@ export default class BottomBar extends Component {
             underlayColor="rgba(238,242,247,0.8)"
             onPress={onImgBlockPress}
           >
-            <View style={[itemStyle, {backgroundColor: 'rgba(255,255,255,0.8)', borderColor: '#ccc'}]}>
+            <View style={enabelItem}>
               <Text style={[styles.label, enableStyle]}>头像</Text>
               <TouchableWithoutFeedback onPress={onImgPress}>
                 <Image source={{uri: img}} style={[styles.img, {marginRight: 10}]}/>
@@ -77,9 +79,33 @@ export default class BottomBar extends Component {
             <Text selectable={true} style={styles.text}>{grade}</Text>
           </View>
 
-          <View style={itemStyle}>
+          <View style={[itemStyle, {borderColor: '#ccc'}]}>
             <Text style={styles.label}>学院</Text>
             <Text selectable={true} style={styles.text}>{department}</Text>
+          </View>
+
+          <View style={enabelItem}>
+            <TouchableWithoutFeedback
+              style={{flex: 1}}
+              onPress={onDiscussPress}
+            >
+              <View style={{flexDirection: 'row', flex: 1, alignItems: 'center'}}>
+                <Text style={[styles.label, enableStyle]}>发帖数</Text>
+                <Text selectable={true} style={[styles.text, {marginRight: 10}]}>{discussNumber}</Text>
+                {rightArrow}
+              </View>
+            </TouchableWithoutFeedback>
+            <View style={{height: 22, marginRight: 5, width: .4, backgroundColor: '#bbb'}}></View>
+            <TouchableWithoutFeedback
+              style={{flex: 1}}
+              underlayColor="rgba(238,242,247,0.8)"
+              onPress={onComentPress}
+            >
+            <View style={{flexDirection: 'row', flex: 1, alignItems: 'center'}}>
+              <Text style={[styles.label, enableStyle]}>评论数</Text>
+              <Text selectable={true} style={[styles.text, ]}>{commentNumber}</Text>
+            </View>
+            </TouchableWithoutFeedback>
           </View>
 
           <TouchableHighlight

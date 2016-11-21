@@ -33,6 +33,7 @@ export default class extends React.Component {
 	static defaultProps={
 
 	}
+	state={}
 
 	render() {
 		const {navigator, setProps, setDiscussProps, title, content} = this.props

@@ -2,6 +2,7 @@
 import db from './storage'
 
 import {Platform} from 'react-native'
+import qs from 'querystring'
 var Toast = Platform.select({
   ios: () => require('react-native-root-toast'),
   android: () => require('react-native').ToastAndroid,
@@ -20,7 +21,8 @@ var utils = {
           takePhotoButtonTitle: '拍照',
           chooseFromLibraryButtonTitle: '选择照片',
           quality: 1.0,
-          allowsEditing: false
+          allowsEditing: false,
+          rotation: false,
         };
         return new Promise((resolve, reject) => {
         	if(this.__imgpickLock===true) {
@@ -45,13 +47,17 @@ var utils = {
 	            // You can display the image using either data...
 	            const source = {uri: `data:${response.type};base64,` + response.data, isStatic: true};
 
+	            /*
 	            // or a reference to the platform specific asset location
 	            if (Platform.OS === 'ios') {
 	              const source = {uri: response.uri.replace('file://', ''), isStatic: true};
 	            } else {
 	              const source = {uri: response.uri, isStatic: true};
 	            }
+	            */
 
+	            source.size = response.fileSize;
+	            source.type = response.type;
 	            resolve(source)
 	          }
 
@@ -154,6 +160,32 @@ var utils = {
 	fetchDiscussList(page, size, previd) {
 		return db.get('token').then((token) => 
 			fetch(`${this.urls.discusslist}?page=${page}&size=${size}${previd!=null?`&prev=${previd}`:''}`, {
+				method: 'GET',
+				headers: {
+					'Accept': 'application/json',
+    				'Content-Type': 'application/json',
+    				'authorization': token
+				}
+			})
+			.then(res => {
+				return res.json()
+			})
+			.then(json=>{
+				if(json.code===200) {
+					return (json.result)
+				} else {
+					this.toast(json.result);
+					return []
+				}
+			}).catch(err=>{
+				DEV && this.toast(err.message)
+				return []
+			})
+		)
+	},
+	fetchUserDiscussList(id, page, size, prev) {
+		return db.get('token').then((token) => 
+			fetch(`${this.urls.discusslist}?${this.urlStringify({id, page, size, prev})}`, {
 				method: 'GET',
 				headers: {
 					'Accept': 'application/json',
@@ -332,10 +364,65 @@ var utils = {
 			})
 		)
 	},
+	fetchUploadBase64Head(data) {
+		return db.get('token').then((token) => 
+			fetch(this.urls.upbase64head, {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+    				'Content-Type': 'application/x-www-form-urlencoded',
+    				'authorization': token
+				},
+				body: qs.stringify({data})
+			})
+			.then(res => res.json())
+			.then(json=>{
+				if(json.code===200) {
+					this.toast(json.result);
+					return true;
+				} else {
+					this.toast(json.result);
+					return false;
+				}
+			}).catch(err=>{
+				DEV && this.toast(err.message)
+				return false;
+			})
+		)
+	},
+	fetchUpdateSign(sign) {
+
+		return db.get('token').then((token) => 
+			fetch(this.urls.infoset, {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+    				'Content-Type': 'application/x-www-form-urlencoded',
+    				'authorization': token
+				},
+				body: qs.stringify({sign})
+			})
+			.then(res => res.json())
+			.then(json=>{
+				if(json.code===200) {
+					this.toast(json.result);
+					return true;
+				} else {
+					this.toast(json.result);
+					return false;
+				}
+			}).catch(err=>{
+				DEV && this.toast(err.message)
+				return false;
+			})
+		)
+	},
 	urlStringify(json) {
 		return Object.getOwnPropertyNames(json).map(k=>k+'='+(!!json[k]?json[k]:'')).join('&')
 	},
 	urls: {
+		infoset: host+'/api/info/set',
+		upbase64head: host+'/api/upload/head/base64',
 		deldiscuss: host+'/api/discuss/del',
 		infoget: host+'/api/info/get',
 		delcomment: host+'/api/comment/del',

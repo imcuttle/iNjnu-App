@@ -9,9 +9,9 @@ var table = 'users';
 
 
 module.exports = {
-    add(id, password, img, sign) {
+    add(id, password, img_path, sign) {
         return new Promise((resolve, reject) => {
-            conn.query('insert into ?? values (?,?,NOW(),?,?)', [table, id, password, img, sign],
+            conn.query('insert into ?? values (?,?,NOW(),?,?)', [table, id, password, img_path, sign],
                 (err, rlt) => {
                     if(err) {console.error(err); reject(err)}
                     else resolve(rlt.affectedRows>0);
@@ -25,6 +25,16 @@ module.exports = {
     update(id, key, value) {
         return new Promise((resolve, reject) => {
             conn.query('update ?? set ??=? where id=?', [table, key, value, id],
+                (err, rlt) => {
+                    if(err) {console.error(err); reject(err)}
+                    else resolve(rlt.affectedRows>0);
+                }
+            )
+        })
+    },
+    updateImg(id, img_path) {
+        return new Promise((resolve, reject) => {
+            conn.query('update ?? set img_path=? where id=?', [table, img_path, id],
                 (err, rlt) => {
                     if(err) {console.error(err); reject(err)}
                     else resolve(rlt.affectedRows>0);

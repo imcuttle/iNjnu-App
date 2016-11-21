@@ -43,7 +43,7 @@ export default class extends React.Component {
 							</View>
 							<Text selectable={true} style={styles.time}>{time}</Text>
 							<View style={styles.contentContainer}>
-								<Markdown style={mdstyle}>{content}</Markdown>
+								<Text>{content}</Text>
 							</View>
 						</View>
 					</View>

@@ -21,7 +21,7 @@ export default class extends Component {
 
 	render() {
 		const {
-			classNo, commentNumber, create_time, department, discussNumber, setPreview, grade, id, img, name, sign,
+			classNo, onImgPress, onDiscussPress, commentNumber, create_time, department, discussNumber, setPreview, grade, id, img, name, sign,
 		} = this.props
 		return (
 			<View style={{flexDirection: 'column', alignItems: 'center',
@@ -30,7 +30,7 @@ export default class extends Component {
 				width: Dimensions.get('window').width*.8,
 				backgroundColor: 'rgba(225, 234, 246, .8)'
 			}}>
-				<TouchableWithoutFeedback onPress={()=>setPreview(img)}>
+				<TouchableWithoutFeedback onPress={onImgPress}>
 					<Image style={{width: 56, height: 56, borderRadius: 30}} source={{uri: img}}/>
 				</TouchableWithoutFeedback>
 				<Text selectable={true} style={styles.name}>{name}</Text>
@@ -50,8 +50,13 @@ export default class extends Component {
 					<Text>{moment(create_time).format('YYYY年MM月DD日')}，第一次遇见iNjnu。</Text>
 				</View>
 				<View style={{flexDirection: 'row', marginTop: 20, }}>
-					<Text selectable={true} style={styles.left}>评论了 {discussNumber} 条</Text>
-					<Text selectable={true} style={styles.right}>发布了 <Text style={{color: '#3CB371'}}>{commentNumber}</Text> 贴</Text>
+					<Text selectable={true} style={styles.left}>评论了 {commentNumber} 条</Text>
+					<TouchableWithoutFeedback
+						onPress={onDiscussPress}>
+						<View>
+							<Text selectable={true} style={styles.right}>发布了 <Text style={{color: '#3CB371'}}>{discussNumber}</Text> 贴</Text>
+						</View>
+					</TouchableWithoutFeedback>
 				</View>
 			</View>
 		)

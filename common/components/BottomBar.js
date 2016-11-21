@@ -32,7 +32,7 @@ export default class BottomBar extends Component {
           onSelect={this._select.bind(this)}>
           <Text name="lookup" style={styles.text}>查查</Text>
           <Text name="discuss" style={styles.text}>讨论</Text>
-          <Text name="friend" style={styles.text}>私信</Text>
+          {/*<Text name="friend" style={styles.text}>私信</Text>*/}
           <Text name="person" style={styles.text}>个人</Text>
       </Tabs>
 		)

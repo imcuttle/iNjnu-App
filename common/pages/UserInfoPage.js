@@ -17,6 +17,7 @@ import UserInfoView from '../components/UserInfoView'
 import LoadingView from '../components/LoadingView'
 
 import utils from '../utils'
+import db from '../storage'
 
 export default class extends Component {
 	state={
@@ -34,7 +35,7 @@ export default class extends Component {
     })
   }
 	render() {
-		const {navigator, route, setPreview} = this.props;
+		const {navigator, route, setPreview, setProps} = this.props;
     const {refreshing, info} = this.state
     
 		return (
@@ -56,8 +57,19 @@ export default class extends Component {
             <View style={{flex: 1, marginTop: 50, marginBottom: 25}}>
               <UserInfoView {...info} 
                 onImgPress={()=>{setPreview(info.img)}}
-                onImgBlockPress={()=>{}}
-                onSignPress={()=>{}}
+                onDiscussPress={()=>{
+                  db.get('user').then(id=>{
+                    navigator.push({
+                      active: 'userDiscussList',
+                      params: {
+                        id: info.id,
+                        isSelf: info.id==id,
+                        name: info.name,
+                        number: info.discussNumber
+                      }
+                    })
+                  })
+                }}
               />
             </View>
           </ScrollView>

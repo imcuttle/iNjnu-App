@@ -20,6 +20,7 @@ import NavigationBar from 'react-native-navbar'
 
 
 import utils from '../utils'
+import db from '../storage'
 
 export default class extends Component {
 
@@ -31,23 +32,19 @@ export default class extends Component {
     
   }
 
-  state={
-    info: {},
-    refreshing: true
-  }
   componentDidMount() {
-    const {navigator} = this.props;
+    const {navigator, setProps} = this.props;
     utils.fetchInfo()
     .then(data=>{
-      this.setState({
+      setProps({
         refreshing: false,
         info: data,
       })
     })
   }
   render() {
-    const {navigator, setPreview} = this.props
-    const {info, refreshing} = this.state;
+    const {navigator, setPreview, setProps} = this.props
+    const {info, refreshing} = this.props;
     return (
       <View style={{flex: 1}}>
         <NavigationBar
@@ -61,10 +58,41 @@ export default class extends Component {
                   {...info}
                   onImgPress={()=>setPreview(info.img)}
                   onImgBlockPress={()=>{
-                    utils.imagePick('请选择照片')
-                    .then(source=>source && this.setState({info: {...info, img: source.uri}}))
+                    utils.imagePick()
+                    .then(source=>{
+                      if(source) {
+                        if(source.fileSize>1024*1024*4) {
+                          utils.toast('图片不能大于4M');
+                          return;
+                        }
+                        utils.toast('正在努力上传中...')
+                        utils.fetchUploadBase64Head(source.uri)
+                        .then(f=> f && setProps({info: {...info, img: source.uri}}) )
+                      }
+                    }).catch(err=>utils.toast(err.message))
                   }}
-                  onSignPress={()=>{}}
+                  onDiscussPress={()=>{
+                    db.get('user').then(id=>{
+                      navigator.push({
+                        active: 'userDiscussList',
+                        params: {
+                          id: info.id,
+                          isSelf: info.id==id,
+                          name: info.name,
+                          number: info.discussNumber
+                        }
+                      })
+                    })
+                    
+                  }}
+                  onSignPress={()=>{
+                    navigator.push({
+                      active: 'editSign',
+                      params: {
+                        initVal: info.sign || ''
+                      }
+                    })
+                  }}
                 />
             }
           </View>

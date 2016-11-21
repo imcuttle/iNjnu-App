@@ -1,6 +1,7 @@
 var express = require('express');
 var jwt = require('jsonwebtoken');
 var p = require('path')
+var fs = require('fs')
 
 var api = express();
 var SECRET = require('./protect').SECRET
@@ -11,9 +12,26 @@ var userdb = require('./database/users')
 var dissdb = require('./database/discusses')
 var commentdb = require('./database/comments')
 
-
+function decodeBase64Image (dataString) {
+	var matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
+		response = {};
+	if (matches.length !== 3) {
+		return new Error('Invalid input string');
+	}
+	response.type = matches[1];
+	response.data = new Buffer(matches[2], 'base64');
+	return response;
+}
 function obj(code, result) {
 	return {code, result}
+}
+function localIp() {
+	return new Promise((resolve, reject) => {
+		require('dns').lookup(require('os').hostname(), function (err, add, fam) {
+			if(err) reject(err)
+			else resolve(add)
+		})
+	})
 }
 function getUserAllInfo(id) {
 	return userdb.get(id).then(u=>{
@@ -22,7 +40,14 @@ function getUserAllInfo(id) {
 			delete u.password;
 			var i = info.img.lastIndexOf('/')
 			info.grade = p.basename(info.img.slice(0, i)).replace(/[\D]/g, '')
-			u.img && delete info.img
+			if(u.img_path){
+				return localIp().then(ip=>{
+					var path = u.img_path
+					delete u.img_path
+					return Object.assign(u, info, {img: "http://"+ip+':'+process.env.PORT+'/users/'+path})
+				})
+			}
+			delete u.img_path
 			return Object.assign(u, info)
 		})
 	})
@@ -88,6 +113,21 @@ api.get('/user/get', (req, res, next) => {
 	}).catch(err=>res.json({code: 502, result: err.message}))
 })
 
+api.post('/info/set', (req, res) => {
+	var tokenJson = req.tokenJson;
+	var sender = tokenJson.id, password = tokenJson.password;
+	var ent = req.body;
+	var sign = ent.sign;
+	if(!sign) {
+		res.json({code: 400, result: '存在空参数'})
+	} else {
+		userdb.update(sender, 'sign', sign)
+			.then(f=>f?obj(200, "修改成功"):obj(400, "修改失败"))
+			.catch(e=>obj(502, e.message))
+			.then(o=>res.json(o))
+	}
+})
+
 api.post('/discuss/put', (req, res) => {
 	var tokenJson = req.tokenJson;
 	var sender = tokenJson.id, password = tokenJson.password;
@@ -97,22 +137,25 @@ api.post('/discuss/put', (req, res) => {
 		res.json({code: 400, result: '存在空参数'})
 	} else {
 		dissdb.add(title, sender, new Date(), content)
-		.then(f=>{
-			f && res.json({code: 200, result: '发布成功'})
-			!f && res.json({code: 404, result: '发布失败'})
-		}).catch(err=>res.json({code: 502, result: err.message}))
+		.then(f=>f?obj(200, '发布成功') :obj(404, '发布失败'))
+		.catch(err=>obj(502, err.message))
+		.then(x=>res.json(x))
 	}
 })
 
 api.get('/discuss/list', (req, res)=> {
 	var tokenJson = req.tokenJson;
 	var ent = req.query;
-	var page = ent.page, size = ent.size, previd = ent.prev
+	var page = ent.page, size = ent.size, previd = ent.prev, id = ent.id
 	if(page == null || size == null) {
 		res.json({code: 400, result: '存在空参数'})
 	} else {
-		dissdb.list(page, size, previd)
+		(!id?dissdb.list(page, size, previd):dissdb.listByUser(id, page, size, previd))
 		.then(list=>{
+			if(!list || !list.length) {
+				res.json({code: 200, result: []})
+				return;
+			}
 			Promise.all(list.map(diss=>{
 				diss.summary=diss.content.slice(0, 50)
 				delete diss.content
@@ -127,7 +170,10 @@ api.get('/discuss/list', (req, res)=> {
 						})
 					})
 			}))
-			.then(disscusses=>res.json({code: 200, result: disscusses.sort((a, b)=>(b.echotime || b.datetime)-(a.echotime || a.datetime))}))
+			.then(disscusses=>{
+				disscusses = !id?disscusses.sort((a, b)=>(b.echotime || b.datetime)-(a.echotime || a.datetime)):disscusses
+				res.json({code: 200, result: disscusses})
+			})
 			.catch(err=>res.json({code: 500, result: err.message}))
 		})
 	}
@@ -260,5 +306,36 @@ api.get('/info/get', (req, res) => {
 	)
 	.catch(err=>res.json(obj(502, err.message)))
 })
+
+
+api.post('/upload/head/base64', (req, res) => {
+	var tokenJson = req.tokenJson;
+	var sender = tokenJson.id, password = tokenJson.password;
+	var ent = req.body;
+	var data = ent.data;
+	if(!data) {
+		res.json(obj(400, '数据为空'))
+	} else {
+		data = decodeBase64Image(data)
+		if(!data.type.startsWith('image')) {
+			res.json(obj(400, '请上传正确的图片数据'))
+		} else if (data.data.length>1024*1024*4) {
+			res.json(obj(400, '图片数据不能大于4M'))
+		} else {
+			var filename = `${sender}.${p.basename(data.type)}`
+			!fs.existsSync('users') && fs.mkdirSync('users')
+			userdb.get(sender).then(x=>x.img_path!=null&&x.img_path!=filename && fs.unlink('users/'+x.img_path))
+			fs.writeFile('users/'+filename, data.data, (err) => {
+				if(!err) {
+					userdb.updateImg(sender, filename)
+					.then(bool=>res.json(bool?obj(200, "上传成功"):obj(402, "上传失败")))
+					.catch(err=>res.json(obj(502, err.message)))
+				} else
+					res.json(obj(502, err.message))
+			})
+		}
+	}
+})
+
 
 module.exports = api;
