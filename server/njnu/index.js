@@ -147,7 +147,7 @@ module.exports = {
 			var form = new FormData();
 			form.append("csrfmiddlewaretoken", ct.token);
 			form.append("info_photo", data, {
-				filename: `iNjnu-app-${filename}`,
+				filename: `iNjnu-app-${Date.now()}`,
 				contentType: type,
 				knownLength: +size
 			});

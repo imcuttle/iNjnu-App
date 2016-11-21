@@ -101,6 +101,9 @@ export default class extends React.Component {
 			        			 		.then(x=>{
 			        			 			if(x) {
 			        			 				setProps({fetching: false, images: x})
+			        			 				navigator.replace({
+			        			 					active: 'lookupFace'
+			        			 				})
 			        			 			} else 
 			        			 				setProps({fetching: false})
 			        			 		})
