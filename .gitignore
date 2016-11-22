@@ -1,5 +1,6 @@
 server/
 
+__tests__/
 # OSX
 #
 .DS_Store
