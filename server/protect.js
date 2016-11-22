@@ -23,6 +23,7 @@ function getToken(req) {
 	return null;
 }
 
+
 protect.use((req, res, next) => {
 	var token = getToken(req);
 	if(!token) {

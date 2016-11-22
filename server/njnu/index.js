@@ -3,27 +3,47 @@ const URL = "http://njnu.chaiziyi.com.cn/getscores";
 const FURL = "http://njnu.chaiziyi.com.cn/face"
 const HOST = "http://njnu.chaiziyi.com.cn"
 const LOGINURL ="http://njnu.chaiziyi.com.cn/login"
+const CACHEPATH = './cache.json'
 
+var fs = require('fs')
 var crypto = require('crypto');
 function md5 (text) {
 	return crypto.createHash('md5').update(text).digest('hex');
 };
 
-const CACHE = {
-	checkStudent: {},
-	info: {},
-	score: {},
-	faceUrl: {},
-	faceMd5: {}
-}
+const CACHE =
+	!fs.existsSync(CACHEPATH)
+	? {
+		checkStudent: {},
+		info: {},
+		score: {},
+		faceUrl: {},
+		faceMd5: {}
+	} : JSON.parse(fs.readFileSync(CACHEPATH).toString())
+
+console.info('CACHE', CACHE)
 
 var FormData = require('form-data');
 
-
 setInterval(() => {
+	saveCache()
 	Object.getOwnPropertyNames(CACHE)
 	.forEach(name=>CACHE[name]={})
 }, 1000*60*60*24*7)
+
+process.on('exit', () => {
+	saveCache()
+})
+
+function saveCache() {
+	fs.writeFileSync(CACHEPATH, JSON.stringify(CACHE))
+	console.info("save cache")
+}
+
+process.on('SIGINT', () => {
+	process.exit(1)
+})
+
 
 module.exports = {
 	getToken(url) {

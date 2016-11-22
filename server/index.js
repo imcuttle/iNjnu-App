@@ -7,6 +7,7 @@ var app = express();
 var path = require('path')
 var protect = require('./protect');
 var api = require('./api');
+const g = {api, protect}
 process.env.PORT = process.env.PORT || 9669
 
 var http = require('http').createServer(app).listen(process.env.PORT, () => {
@@ -32,8 +33,42 @@ app.all('/', (req, res, next) => {
 })
 
 
-app.use('/api', api);
+app.use('/api', g.api);
 
-app.use('/protect', protect);
+app.use('/protect', g.protect);
 
 module.exports = app
+
+app.all('/restart', (req, res) => {
+	process.exit(1);
+})
+
+function cleanCache(modulePath) {
+	var module = require.cache[modulePath];
+	// remove reference in module.parent
+	if (module.parent) {
+		module.parent.children.splice(module.parent.children.indexOf(module), 1);
+	}
+	require.cache[modulePath] = null;
+}
+
+/*
+
+require('fs').watch(path.resolve('./api.js'), function () {
+	cleanCache(require.resolve('./api.js'));
+	try {
+		g.api = require('./api')
+	} catch (ex) {
+		console.error('module update failed', ex.message);
+	}
+});
+
+require('fs').watch(path.resolve('./protect.js'), function () {
+	cleanCache(require.resolve('./protect.js'));
+	try {
+		g.protect = require('./protect')
+	} catch (ex) {
+		console.error('module update failed', ex.message);
+	}
+});
+*/
