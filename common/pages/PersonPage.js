@@ -43,7 +43,7 @@ export default class extends Component {
     })
   }
   render() {
-    const {navigator, setPreview, setProps} = this.props
+    const {navigator, setPreview, setProps, confirm, reset} = this.props
     const {info, refreshing} = this.props;
     return (
       <View style={{flex: 1}}>
@@ -54,7 +54,9 @@ export default class extends Component {
           <View style={styles.mainContent}>
             {
               refreshing ? <Loading /> 
-              : <Information navigator={navigator} 
+              : 
+              <View>
+              <Information navigator={navigator} 
                   {...info}
                   onImgPress={()=>setPreview(info.img)}
                   onImgBlockPress={()=>{
@@ -93,7 +95,18 @@ export default class extends Component {
                       }
                     })
                   }}
-                />
+                  onLogoutPress={()=>{
+                    confirm('确定退出？', ()=>{
+                      Promise.all([
+                        db.del('token'),
+                        db.del('user')
+                      ]).then(x=>reset())
+                    })
+                  }}
+                />  
+                
+              </View>
+
             }
           </View>
           <BottomBar style={{flex: 1}} navigator={navigator} active={'person'} />

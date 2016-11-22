@@ -85,7 +85,7 @@ export default class extends Component {
         onPress={(e)=>{rowData.onPress(rowData, e);}}
       >
         <View style={styles.item}>
-          <Image source={{uri: rowData.img}} style={styles.img}/>
+          <Image source={rowData.img} style={styles.img}/>
           <Text style={styles.name}>{rowData.name}</Text>
         </View>
   		</TouchableHighlight>
@@ -96,8 +96,8 @@ export default class extends Component {
 var styles = StyleSheet.create({
     name: {
       marginTop: 3,
-      fontSize: 16.5,
-      color: 'black'
+      fontSize: 15.5,
+      color: '#555'
     },
     img: {
       width: 40,
@@ -107,7 +107,7 @@ var styles = StyleSheet.create({
       alignSelf: 'center'
     },
     list: {
-      justifyContent: 'flex-start',
+      justifyContent: 'center',
       flexDirection: 'row',
       flexWrap: 'wrap'
     },

@@ -18,26 +18,7 @@ var Student = t.struct({
   password: t.String  // an optional string
 });
 
-var options = {
-	auto: 'placeholders',
 
-	fields: {
-	  id: {
-	  	underlineColorAndroid: 'rgba(0,0,0,0)',
-	  	autoCorrect: false,
-	  	error: '请输入学号',
-      keyboardType: 'numeric',
-	    placeholder: '学号' // <= label for the name field
-	  }, password: {
-	  	underlineColorAndroid: 'rgba(0,0,0,0)',
-      autoCorrect: false,
-      password: true,
-	  	secureTextEntry: true,
-      error: '请输入密码',
-		  placeholder: '密码' // <= label for the name field
-	  }
-	}
-}; // optional rendering options (see documentation)
 
 import utils from '../utils'
 
@@ -48,6 +29,7 @@ export default class AwesomeProject extends Component {
 		var val = this.refs.form.getValue();
 		if(val && val.id && val.password && enable) {
       this.setState({enable: false})
+      utils.toast('登录中...')
 			utils.fetchLoginAction(val.id, val.password)
 			.then(token => {
         if(token) {
@@ -55,7 +37,7 @@ export default class AwesomeProject extends Component {
           .then(()=>{
 
           }, (err)=>{
-            alert(err.message);
+            
           })
           utils.toast('登录成功')
           setParentState({login: true})  
@@ -67,15 +49,36 @@ export default class AwesomeProject extends Component {
 		}
 	}
   state = {
-    enable: true
+    enable: true,
   }
 	render() {
     const {enable} = this.state;
+    var options = {
+      auto: 'placeholders',
+      fields: {
+        id: {
+          underlineColorAndroid: 'rgba(0,0,0,0)',
+          autoCorrect: false,
+          error: '请输入学号',
+          keyboardType: 'numeric',
+          editable: enable,
+          placeholder: '学号' // <= label for the name field
+        }, password: {
+          underlineColorAndroid: 'rgba(0,0,0,0)',
+          autoCorrect: false,
+          password: true,
+          editable: enable,
+          secureTextEntry: true,
+          error: '请输入密码',
+          placeholder: '密码' // <= label for the name field
+        }
+      }
+    };
 		return (
 			<View style={styles.container}>
         <View style={styles.form}>
   			  <Form ref="form" type={Student} options={options} />
-          <TouchableHighlight style={[styles.button, !enable && styles.disable]} onPress={this._login.bind(this)} underlayColor='#99d9f4'>
+          <TouchableHighlight style={[styles.button, !enable && styles.disable]} onPress={enable?this._login.bind(this):null} underlayColor='#99d9f4'>
             <Text style={[styles.buttonText]}>登录</Text>
           </TouchableHighlight>
         </View>

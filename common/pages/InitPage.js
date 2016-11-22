@@ -33,13 +33,17 @@ export default class extends Component {
   render() {
     const {navigator, route} = this.props;
     return (
-      <View>
-        <NavigationBar
-          title={{title: route.title, tintColor: 'red', style: {fontSize: 20}}}
+      <View style={{flex: 1}}>
+        {/*<NavigationBar
+          title={{title: 'iNjnu', tintColor: 'red', style: {fontSize: 20}}}
           style={{height: 45, flex: null}}
-        />
+        />*/}
         <View style={styles.container}>
-          <Spinner visible={true} color='red' />
+          <View style={{position: 'absolute', left: 0, right: 0, top: 60, zIndex: 3}}>
+          <Text style={{color: 'white', textAlign: 'center', fontSize: 25}}>i Njnu.</Text>
+          </View>
+          <Image style={{flex: 1}} resizeMode="cover" source={{uri: 'http://down1.cnmo.com/cnmo-app/a201/jianbiansecai.jpg'}}/>
+          {<Spinner visible={true} color='#3e9ce9' />}
         </View>
       </View>
     )
@@ -49,6 +53,6 @@ export default class extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F6F6'
+    backgroundColor: 'rgb(55, 71, 79)'
   },
 })

@@ -34,7 +34,7 @@ export default class BottomBar extends Component {
       img, name, classNo, department, grade, create_time,
       commentNumber, discussNumber, id, sign,
       onImgPress, onImgBlockPress, onSignPress,
-      onDiscussPress, onComentPress
+      onDiscussPress, onComentPress, onLogoutPress
     } = this.props;
     
     const rightArrow = <Image style={styles.rightArrow} source={require("../res/imgs/Forward.png")}/>
@@ -125,6 +125,22 @@ export default class BottomBar extends Component {
               </View>
             </View>
           </TouchableHighlight>
+
+          <View style={{height: 20}}></View>
+          <TouchableHighlight
+            underlayColor="#FF6666"
+            onPress={onLogoutPress}
+          >
+            <View style={[enabelItem, {backgroundColor: '#FF3333',
+             borderColor: '#ccc', borderWidth: .5,
+             paddingVertical: 4, height: 50
+           }]}>
+              <View>
+                <Text style={{ color: 'white', fontSize: 18}}>退出该帐号</Text>
+              </View>
+            </View>
+          </TouchableHighlight>
+          
         </View>
       </ScrollView>
     )

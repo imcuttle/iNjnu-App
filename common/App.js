@@ -63,7 +63,29 @@ export default class App extends Component {
     this.setPersonProps = this.setPersonProps.bind(this)
     this.confirm = this.confirm.bind(this)
     this.onBackAndroid = this.onBackAndroid.bind(this)
+    this.reset = this.reset.bind(this)
   }
+  reset() {
+    this.setState({
+      login: false,
+      discussProps: {},
+      deployProps: {},
+      friendProps: {},
+      discussMainProps: {},
+      preview: '',
+      personProps: {
+        info: {},
+        refreshing: true,
+      },
+      lookupFaceProps: {
+        images: [],
+        url: '',
+        fetching: false
+      },
+    })
+    this.navigator && this.navigator.resetTo(this.initRoute)
+  }
+  initRoute={active: 'lookup', title: "iNjnu", params: {id: '19130126'}}
   onBackAndroid() {
 
     if(this.navigator) {
@@ -84,14 +106,15 @@ export default class App extends Component {
     if(Platform.OS==='android')
       BackAndroid.removeEventListener('hardwareBackPress', this.onBackAndroid);
   }
-  componentWillMount() {
+  componentDidMount() {
     if(Platform.OS==='android')
       BackAndroid.addEventListener('hardwareBackPress', this.onBackAndroid);
-
-  	utils.isLogin()
-  	.then(login=>{
-      this.setState({login: login, loading: false})
-    });
+    setTimeout(()=>{
+      utils.isLogin()
+      .then(login=>{
+        this.setState({login: login, loading: false})
+      });
+    }, 3000)
   }
   setDiscussProps(props) {
     const {loading, login, discussProps, friendProps, discussMainProps} = this.state;
@@ -110,7 +133,7 @@ export default class App extends Component {
 
     return (
         <Navigator
-          initialRoute={{active: 'lookup', title: "iNjnu", params: {id: '19130126'}}}
+          initialRoute={this.initRoute}
           renderScene={(route, navigator) => {
               if(!this.navigator) {
                 this.navigator = navigator
@@ -140,9 +163,11 @@ export default class App extends Component {
                     Page = <PersonPage 
                       route={route} 
                       navigator={navigator} 
+                      confirm={this.confirm}
                       setProps={this.setPersonProps}
                       setParentState={this.setState.bind(this)} 
                       setPreview={(preview)=>this.setState({preview})}
+                      reset={this.reset}
                       {...personProps}
                     />
                   } else if(active === 'chat') {
@@ -242,13 +267,13 @@ export default class App extends Component {
   confirm(title='title', onOk, onCancel) {
     this.popup.confirm({
         title: title,
-        ok: { text: '确定', style: {color: 'green'},
+        ok: { text: '确定', style: {color: 'red'},
             callback: onOk,
         },
         cancel: {
             text: '取消',
             style: {
-                color: 'red'
+                color: '#3e9ce9'
             },
             callback: onCancel,
         },

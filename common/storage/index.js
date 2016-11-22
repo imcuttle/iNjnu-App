@@ -19,5 +19,16 @@ export default {
 				resolve(rlt);
 			}
 		})
-	})
+	}),
+	del(key) {
+		return new Promise((resolve, reject) => {
+			AsyncStorage.removeItem(key, (err, rlt) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve();
+				}
+			})
+		})
+	}
 }

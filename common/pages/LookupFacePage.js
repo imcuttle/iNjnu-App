@@ -187,7 +187,7 @@ export default class extends React.Component {
 					          	underlayColor="rgba(238,242,247,0.8)"
 						        onPress={(e)=>{setPreview(images[0].src)}}
 						        >
-					          	<Image source={{uri: images[0].src}} style={styles.ximg}/>
+					          	<Image resizeMode="cover" source={{uri: images[0].src}} style={styles.ximg}/>
 					          </TouchableHighlight>
 					          <Text style={styles.text}>{images[0].text}</Text>
 					        </View>
@@ -208,7 +208,7 @@ export default class extends React.Component {
 							          	underlayColor="rgba(238,242,247,0.8)"
 								        onPress={(e)=>{setPreview(rowData.src)}}
 								        >
-							          	<Image source={{uri: rowData.src}} style={styles.ximg}/>
+							          	<Image resizeMode="cover" source={{uri: rowData.src}} style={styles.ximg}/>
 							          </TouchableHighlight>
 							          <Text style={styles.text}>{rowData.text}</Text>
 							        </View>

@@ -42,7 +42,7 @@ export default class extends Component {
           <View style={styles.mainContent}>
             <Grid 
               ds={[{
-                img: 'https://facebook.github.io/react/img/logo_og.png',
+                img: require('../res/imgs/stu.png'),
                 name: '查成绩',
                 onPress: (data)=>{
                   navigator.push({
@@ -50,7 +50,7 @@ export default class extends Component {
                   })
                 }
               }, {
-                img: 'https://facebook.github.io/react/img/logo_og.png',
+                img: require('../res/imgs/face.png'),
                 name: '撞脸秀',
                 onPress: (data)=>{
                   navigator.push({

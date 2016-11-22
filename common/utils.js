@@ -9,7 +9,7 @@ var Toast = Platform.select({
 })();
 
 
-var host = "http://192.168.2.100:9669";
+var host = "http://202.119.104.195";
 // db.set('host', )
 var DEV = true
 var ImagePicker = require('react-native-image-picker');
