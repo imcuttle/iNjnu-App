@@ -1,5 +1,5 @@
 {
-  "name": "iNjnu",
+  "name": "injnu",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -35,5 +35,17 @@
   },
   "jest": {
     "preset": "jest-react-native"
-  }
+  },
+  "description": "- [x] markdown content(link open webview) - [x] chat system/websocket - [x] system notification - [x] personal comment List View",
+  "main": "index.android.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moyuyc/iNjnu-App.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/moyuyc/iNjnu-App/issues"
+  },
+  "homepage": "https://github.com/moyuyc/iNjnu-App#readme"
 }
