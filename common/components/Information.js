@@ -12,6 +12,8 @@ import {
 import Tabs from 'react-native-tabs';
 import {Map} from 'immutable'
 
+import res from '../res'
+
 
 export default class BottomBar extends Component {
 
@@ -37,7 +39,7 @@ export default class BottomBar extends Component {
       onDiscussPress, onComentPress, onLogoutPress
     } = this.props;
     
-    const rightArrow = <Image style={styles.rightArrow} source={require("../res/imgs/Forward.png")}/>
+    const rightArrow = <Image style={styles.rightArrow} source={{uri: res.forwordIcon}}/>
     const itemStyle = [styles.item, {height: 58}]
     const enableStyle = {color: '#666'}
     const enabelItem = [itemStyle, {backgroundColor: 'rgba(255,255,255,0.8)', borderColor: '#ccc'}]

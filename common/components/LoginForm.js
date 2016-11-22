@@ -69,7 +69,7 @@ export default class AwesomeProject extends Component {
           password: true,
           editable: enable,
           secureTextEntry: true,
-          error: '请输入密码',
+          error: '请输入密码，教务系统',
           placeholder: '密码' // <= label for the name field
         }
       }

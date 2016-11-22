@@ -15,6 +15,7 @@ import {
 import BottomBar from '../components/BottomBar'
 import Grid from '../components/LookupGrid'
 import NavigationBar from 'react-native-navbar';
+import res from '../res'
 
 export default class extends Component {
 
@@ -42,16 +43,16 @@ export default class extends Component {
           <View style={styles.mainContent}>
             <Grid 
               ds={[{
-                img: require('../res/imgs/stu.png'),
                 name: '查成绩',
+                img: {uri: res.stuIcon},
                 onPress: (data)=>{
                   navigator.push({
                     active: 'lookupScore'
                   })
                 }
               }, {
-                img: require('../res/imgs/face.png'),
                 name: '撞脸秀',
+                img: {uri: res.faceIcon},
                 onPress: (data)=>{
                   navigator.push({
                     active: 'lookupFace'
