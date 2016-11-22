@@ -1,3 +1,6 @@
+# iNjnu App
+
+Based on React Native.
 
 ## todo list
 
@@ -10,3 +13,6 @@
 ## bugs
 
 - 个人公告不能完全删除
+
+
+## 更新
