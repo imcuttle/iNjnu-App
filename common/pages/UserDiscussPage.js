@@ -46,7 +46,7 @@ export default class extends Component {
   }
 
   render() {
-    const {navigator, params, deltaDiscussNumber, rmDisscuss} = this.props;
+    const {navigator, params, deltaDiscussNumber, rmDisscuss, confirm} = this.props;
     const {number, isSelf, name, id} = params
     const {userDiscussProps, sumNumber} = this.state;
     console.log(userDiscussProps)
@@ -65,7 +65,8 @@ export default class extends Component {
           }}
         />
         <View style={styles.mainContent}>
-          <DiscussList navigator={navigator} 
+          <DiscussList navigator={navigator}
+            confirm={confirm} 
             params={params}
             setProps={(props)=>{
               this.setState({userDiscussProps: {...userDiscussProps, ...props}})

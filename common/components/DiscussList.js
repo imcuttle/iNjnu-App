@@ -78,9 +78,12 @@ export default class extends Component {
     //setProps({refreshing: false, loadmore: false})
   }
   componentDidMount() {
-    const {setProps, ds, hasmore} = this.props
+    const {setProps, ds, hasmore, focusRefresh} = this.props
     if(hasmore&&ds.length===0) {
       this._addList()
+    }
+    if(focusRefresh) {
+      this._onRefresh();
     }
   }
   componentDidUpdate() {
@@ -204,7 +207,7 @@ export default class extends Component {
     }
 
     if(discusses.length===0) {
-      setProps({loadmore: false, hasmore: false, refreshing: false})
+      setProps({ds: replace?[]:ds, loadmore: false, hasmore: false, refreshing: false})
     } else {
       setProps({ds: !replace?ds.concat(newData): newData, loadmore: false, hasmore: true})
     }
@@ -236,7 +239,7 @@ export default class extends Component {
     })
   }
   renderItem(rowData, sectionID, rowID, highlightRow) {
-    const {navigator, params, setProps, sumNumber, ds, rmDisscuss, deltaSumNumber, deltaDiscussNumber} = this.props
+    const {navigator, params, setProps, confirm, sumNumber, ds, rmDisscuss, deltaSumNumber, deltaDiscussNumber} = this.props
     const {id, number, isSelf, name} = params;
   	var style = {paddingHorizontal: 12, paddingVertical: 6}
     // alert(JSON.stringify(params))
@@ -248,6 +251,7 @@ export default class extends Component {
               active: 'discussMain',
               title: rowData.title,
               params: {
+                user: rowData.sender,
                 id: rowData.id
               }
             })
@@ -272,30 +276,36 @@ export default class extends Component {
               title: rowData.title,
               params: {
                 id: rowData.id,
-                noDel: true,
-              }
-            })
-          }}
-          onDelPress={()=>{
-            utils.fetchDelDiscuss(rowData.id)
-            .then(f=>{
-              if(f) {
-                var list = List(ds)
-                var i = list.toArray().findIndex(x=>x.id===rowData.id)
-                if(i>=0){
-                  list = list.remove(i).toArray()
-                  if(list.length===0) {
-                    setProps({hasmore: false, ds: []})
-                  } else {
-                    setProps({ds: list})
-                  }
+                onDelCallback: ()=>{
                   deltaSumNumber(-1)
                   deltaDiscussNumber(-1)
                   rmDisscuss(rowData.id)
-                }
+                },
               }
             })
           }}
+          onDelPress={isSelf?()=>
+            confirm('确定删除该帖子？', () => {
+              utils.fetchDelDiscuss(rowData.id)
+              .then(f=>{
+                if(f) {
+                  var list = List(ds)
+                  var i = list.toArray().findIndex(x=>x.id===rowData.id)
+                  if(i>=0){
+                    list = list.remove(i).toArray()
+                    if(list.length===0) {
+                      setProps({hasmore: false, ds: []})
+                    } else {
+                      setProps({ds: list})
+                    }
+                    deltaSumNumber(-1)
+                    deltaDiscussNumber(-1)
+                    rmDisscuss(rowData.id)
+                  }
+                }
+              })
+            })
+          :null}
         />
       )
   }

@@ -67,6 +67,10 @@ export default class extends Component {
                           utils.toast('图片不能大于4M');
                           return;
                         }
+                        if(source.type.endsWith('gif')) {
+                          utils.toast('不支持gif头像');
+                          return;
+                        }
                         utils.toast('正在努力上传中...')
                         utils.fetchUploadBase64Head(source.uri)
                         .then(f=> f && setProps({info: {...info, img: source.uri}}) )

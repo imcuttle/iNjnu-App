@@ -127,10 +127,11 @@ export default class extends React.Component {
 	render() {
 		const {
 			navigator, setProps, route, refreshing, hasmore, commentNumber, 
-			commentEnable, loadmore, comments, discuss, commentVal, id, confirm
+			commentEnable, loadmore, comments, discuss, commentVal, id, confirm,
+			selfId
 		} = this.props
 		const {size} = this.state
-		bgcolor = commentEnable?'rgb(14, 167, 221)':'rgb(125, 125, 125)'
+		var bgcolor = commentEnable?'rgb(14, 167, 221)':'rgb(125, 125, 125)'
 		return (
 			<View style={{flex: 1, backgroundColor: '#F8F8FF',}}>
 				<NavigationBar 
@@ -198,7 +199,7 @@ export default class extends React.Component {
 										title: comment.user.name
 									})
 								}}
-								onDelPress={route.params.comment.user.id==discuss.sender.id?()=>{
+								onDelPress={selfId==discuss.sender.id?()=>{
 									var i = this.delList.findIndex(x=>x===comment.id)
 				                	if(i>=0) {
 				                		utils.toast(':) 正在处理中...')
@@ -313,7 +314,7 @@ export default class extends React.Component {
 			return {}
 		}
 		return {
-			onDelPress: discuss.sender.id==selfId && !route.params.noDel ?()=>{
+			onDelPress: discuss.sender.id==selfId?()=>{
 				var i = this.delList.findIndex(x=>x.id===discuss.id)
             	if(i>=0) {
             		utils.toast(':) 正在处理中...')
@@ -330,6 +331,7 @@ export default class extends React.Component {
 		                    		this.delList = List(this.delList).remove(i).toArray()
 		                    	}
 	                    		navigator.pop()
+								route.params.onDelCallback && route.params.onDelCallback()
 	                    		setDiscussProps({
 				              		refreshing: true,
 				              		hasmore: true,

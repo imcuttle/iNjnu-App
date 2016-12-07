@@ -58,6 +58,14 @@ export default class extends Component {
                     active: 'lookupFace'
                   })
                 }
+              }, {
+                name: '课表瞥',
+                img: {},
+                onPress: (data)=> {
+                  navigator.push({
+                    active: 'lookupTable'
+                  })
+                }
               }]}
               style={{flex: 1}}></Grid>
           </View>

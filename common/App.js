@@ -29,6 +29,7 @@ import ChatPage from './pages/ChatPage'
 import DeployPage from './pages/DeployPage'
 import LookupScorePage from './pages/LookupScorePage'
 import LookupFacePage from './pages/LookupFacePage'
+import LookupTablePage from './pages/LookupTablePage'
 import UserInfoPage from './pages/UserInfoPage'
 import UserDiscussPage from './pages/UserDiscussPage'
 import EditSignPage from './pages/EditSignPage'
@@ -204,7 +205,8 @@ export default class App extends Component {
                       navigator={navigator} route={route}
                     />
                   } else if(active === 'userDiscussList') {
-                    Page = <UserDiscussPage 
+                    Page = <UserDiscussPage
+                      confirm={this.confirm}
                       deltaDiscussNumber={(n)=>{
                         personProps.info && personProps.info.discussNumber 
                         && this.setPersonProps({
@@ -247,6 +249,10 @@ export default class App extends Component {
                       }
                       {...lookupFaceProps}
                       navigator={navigator} 
+                    />
+                  } else if(active === 'lookupTable') {
+                    Page = <LookupTablePage
+                      navigator={navigator}
                     />
                   }
                 }

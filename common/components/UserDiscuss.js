@@ -20,25 +20,28 @@ export default class BottomBar extends Component {
 		const {title, img, name, tip, summary, onPress, onDelPress} = this.props;
 		return (
 			<TouchableHighlight
-        style={styles.item}
-        onPress={onPress}
-        underlayColor="rgba(238,242,247,0.8)"
-      >
-        <View>
-          <View style={{flex: 1, flexDirection: 'row'}}>
-            <Text style={[styles.title, {flex: 1}]}>标题：{title}</Text>
-            <TouchableWithoutFeedback onPress={onDelPress}>
-              <View style={{}}>
-                <Text style={{textAlign: 'right', fontSize: 13, color: 'red'}}>删除</Text>
+              style={styles.item}
+              onPress={onPress}
+              underlayColor="rgba(238,242,247,0.8)"
+            >
+              <View>
+                <View style={{flex: 1, flexDirection: 'row'}}>
+                  <Text style={[styles.title, {flex: 1}]}>标题：{title}</Text>
+                  {
+                    onDelPress &&
+                    <TouchableWithoutFeedback onPress={onDelPress}>
+                      <View style={{}}>
+                        <Text style={{textAlign: 'right', fontSize: 13, color: 'red'}}>删除</Text>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  }
+                </View>
+                <Text style={styles.summary}>内容：{summary+'...'}</Text>
+                <View style={{flex: 1}}>
+                  <Text style={styles.tip}>{tip}</Text>
+                </View>
               </View>
-            </TouchableWithoutFeedback>
-          </View> 
-          <Text style={styles.summary}>内容：{summary+'...'}</Text>
-          <View style={{flex: 1}}>
-            <Text style={styles.tip}>{tip}</Text>
-          </View>
-        </View>
-      </TouchableHighlight>
+            </TouchableHighlight>
 		)
 	}
 

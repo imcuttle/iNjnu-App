@@ -36,7 +36,7 @@ export default class extends Component {
   }
 	render() {
 		const {navigator, route, setPreview, setProps} = this.props;
-    const {refreshing, info} = this.state
+        const {refreshing, info} = this.state
     
 		return (
       <View style={{flex: 1, backgroundColor: '#F8F8FF'}}>
