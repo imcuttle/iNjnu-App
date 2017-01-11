@@ -8,7 +8,7 @@ var Toast = Platform.select({
   android: () => require('react-native').ToastAndroid,
 })();
 
-var address = "192.168.2.100:8668"
+var address = "202.119.104.195"
 var host = "http://"+address;
 // db.set('host', )
 var DEV = true

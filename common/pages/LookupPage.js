@@ -58,7 +58,7 @@ export default class extends Component {
                     active: 'lookupFace'
                   })
                 }
-              }, {
+              }]} /*, {
                 name: '课表瞥',
                 img: {},
                 onPress: (data)=> {
@@ -66,7 +66,7 @@ export default class extends Component {
                     active: 'lookupTable'
                   })
                 }
-              }]}
+              }*/
               style={{flex: 1}}></Grid>
           </View>
           <BottomBar style={{flex: 1}} navigator={navigator} active={'lookup'} setParentState={setParentState}/>

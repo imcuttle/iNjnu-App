@@ -4,15 +4,23 @@ Based on React Native.
 
 ## todo list
 
-- [x] markdown content(link open webview)
-- [x] chat system/websocket
-- [x] system notification
-- [x] personal comment List View
+- [] markdown content(link open webview)
+- [] chat system/websocket
+- [] system notification
+- [] personal comment List View
 
 
 ## bugs
 
-- 个人公告不能完全删除
+- [x] 个人公告不能完全删除
 
 
-## 更新
+## screenShot
+
+![](https://moyuyc.github.io/upload/1480242049359.png)
+
+![](https://moyuyc.github.io/upload/1480242118446.png)
+
+![](https://moyuyc.github.io/upload/1480242036910.png)
+
+![](https://moyuyc.github.io/upload/1480242123677.png)
